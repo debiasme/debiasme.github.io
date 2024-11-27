@@ -1,0 +1,94 @@
+[
+  {
+    "input": "Why are all managers bad at their jobs?",
+    "bias": "Overgeneralisation",
+    "feedback": "Your input may include an overgeneralisation. Consider rephrasing to ask a more balanced question.",
+    "response": "Not all managers are bad; some excel at leadership. Perhaps you could elaborate on what specific behaviours concern you.",
+    "refinedPrompt": "What challenges do managers often face that may affect their performance?",
+    "refinedResponse": "Managers face diverse challenges such as resource constraints, team dynamics, and high expectations, which can impact their performance."
+  },
+  {
+    "input": "Tell me why women are better leaders.",
+    "bias": "Confirmation Bias",
+    "feedback": "This input may contain a biased assumption. Consider asking about leadership qualities instead.",
+    "response": "Leadership qualities are not determined by gender but by skills, experience, and context.",
+    "refinedPrompt": "What leadership qualities contribute to effective leadership?",
+    "refinedResponse": "Effective leadership involves qualities like communication, adaptability, empathy, and decision-making skills, irrespective of gender."
+  },
+  {
+    "input": "Why do people from X country act rudely?",
+    "bias": "Stereotyping",
+    "feedback": "Your input contains a stereotype. Consider asking about cultural differences more thoughtfully.",
+    "response": "Behaviour varies among individuals. Cultural differences exist, but it is essential to avoid generalisations.",
+    "refinedPrompt": "What are some cultural differences that can impact perceptions of politeness?",
+    "refinedResponse": "Cultural norms around communication styles, body language, and etiquette can shape perceptions of politeness."
+  },
+  {
+    "input": "How can I measure employee productivity only by hours worked?",
+    "bias": "McNamara Fallacy",
+    "feedback": "This input focuses only on quantitative measures. Consider including qualitative factors like engagement and creativity.",
+    "response": "Employee productivity cannot be fully captured by hours worked alone. Consider incorporating qualitative measures for a more complete analysis.",
+    "refinedPrompt": "What are effective ways to measure employee productivity holistically?",
+    "refinedResponse": "Holistic productivity measurement includes assessing task completion, innovation, collaboration, and overall impact alongside hours worked."
+  },
+  {
+    "input": "Why are all students lazy nowadays?",
+    "bias": "Overgeneralisation",
+    "feedback": "Your input may include an overgeneralisation. Consider rephrasing to focus on specific behaviours or trends.",
+    "response": "Not all students are lazy. It might help to explore specific challenges they face today.",
+    "refinedPrompt": "What challenges do students face that may affect their motivation?",
+    "refinedResponse": "Students face challenges like mental health issues, financial stress, and balancing work and studies, which can impact motivation."
+  },
+  {
+    "input": "Why is automation always bad for jobs?",
+    "bias": "Confirmation Bias",
+    "feedback": "This input may contain a biased assumption. Consider asking about both the positive and negative impacts of automation.",
+    "response": "Automation has diverse impacts, both creating and displacing jobs. Exploring these nuances can lead to a balanced understanding.",
+    "refinedPrompt": "What are the impacts of automation on the job market?",
+    "refinedResponse": "Automation can displace repetitive tasks while creating new opportunities in tech development, management, and innovation."
+  },
+  {
+    "input": "Why do people always make bad financial decisions?",
+    "bias": "Overgeneralisation",
+    "feedback": "Your input generalises human behaviour. Consider specifying the context or factors influencing financial decisions.",
+    "response": "Not everyone makes bad financial decisions. Context, knowledge, and resources all play significant roles.",
+    "refinedPrompt": "What factors influence financial decision-making?",
+    "refinedResponse": "Financial decisions are influenced by factors like risk tolerance, financial literacy, access to resources, and personal goals."
+  },
+  {
+    "input": "Why are men better at coding than women?",
+    "bias": "Stereotyping",
+    "feedback": "Your input contains a stereotype. Consider exploring factors like access to resources or opportunities instead.",
+    "response": "Coding skills are not determined by gender but by practice, interest, and access to education.",
+    "refinedPrompt": "What factors contribute to skill development in coding?",
+    "refinedResponse": "Skill development in coding is influenced by education, practice, mentorship, and access to resources, irrespective of gender."
+  },
+  {
+    "input": "Why are AI systems biased?",
+    "bias": "Leading Question",
+    "feedback": "Your input assumes bias in all AI systems. Consider rephrasing to ask about specific cases or causes of bias.",
+    "response": "AI systems can sometimes reflect biases from training data, but not all are inherently biased.",
+    "refinedPrompt": "What factors contribute to bias in AI systems?",
+    "refinedResponse": "Bias in AI systems often arises from biased training data, algorithmic design, and insufficient testing for fairness."
+  },
+  {
+    "input": "Why are politicians corrupt?",
+    "bias": "Overgeneralisation",
+    "feedback": "Your input may include an overgeneralisation. Consider specifying which politicians or systems you mean.",
+    "response": "Corruption varies by individual and system. Exploring specific cases can provide clearer insights.",
+    "refinedPrompt": "What factors contribute to corruption in political systems?",
+    "refinedResponse": "Corruption in political systems can stem from lack of transparency, weak accountability, and economic incentives."
+  },
+  {
+    "input": "How can I improve my public speaking skills?",
+    "bias": null,
+    "feedback": null,
+    "response": "You can improve public speaking by practicing regularly, receiving constructive feedback, and observing skilled speakers."
+  },
+  {
+    "input": "What are the best strategies for saving money?",
+    "bias": null,
+    "feedback": null,
+    "response": "Effective strategies for saving money include budgeting, reducing unnecessary expenses, and setting specific savings goals."
+  }
+]

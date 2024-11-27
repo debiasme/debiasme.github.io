@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Low-Fi AI Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-900 text-gray-200 h-screen flex flex-col">
+    <div
+      class="flex-grow flex flex-col max-w-3xl mx-auto bg-gray-800 shadow-lg rounded-lg overflow-hidden mt-8"
+    >
+      <!-- Chat Box -->
+      <div id="chat-box" class="flex-grow p-6 overflow-y-auto">
+        <!-- Messages will appear here -->
+      </div>
+
+      <!-- Input Section -->
+      <div class="bg-gray-700 p-4 flex flex-col space-y-4">
+        <select
+          id="user-select"
+          class="p-2 rounded-lg border border-gray-600 shadow-sm focus:ring-2 focus:ring-blue-500 bg-gray-800 text-gray-200"
+        >
+          <option value="">-- Select a message --</option>
+        </select>
+        <input
+          id="user-input"
+          type="text"
+          placeholder="Your selected message will appear here or type your own"
+          class="p-2 rounded-lg border border-gray-600 shadow-sm bg-gray-800 text-gray-200"
+        />
+        <button
+          onclick="sendMessage()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let scenarios = [];
+
+      // Load scenarios from JSON file
+      async function loadScenarios() {
+        const response = await fetch("scenarios.json");
+        scenarios = await response.json();
+
+        const userSelect = document.getElementById("user-select");
+        scenarios.forEach((scenario) => {
+          const option = document.createElement("option");
+          option.value = scenario.input;
+          option.textContent = scenario.input;
+          userSelect.appendChild(option);
+        });
+      }
+
+      loadScenarios();
+
+      document
+        .getElementById("user-select")
+        .addEventListener("change", function () {
+          const selectedMessage = this.value.trim();
+          const userInput = document.getElementById("user-input");
+
+          if (selectedMessage) {
+            userInput.value = selectedMessage;
+            userInput.disabled = true;
+          } else {
+            userInput.value = "";
+            userInput.disabled = false;
+          }
+        });
+
+      async function sendMessage() {
+        const userInputElement = document.getElementById("user-input");
+        const userMessage = userInputElement.value.trim();
+        const chatBox = document.getElementById("chat-box");
+
+        if (userMessage === "") {
+          alert("Please select or type a message.");
+          return;
+        }
+
+        // Display user message
+        const userMessageDiv = document.createElement("div");
+        userMessageDiv.className = "text-right mb-4";
+        userMessageDiv.innerHTML = `<div class="inline-block bg-blue-600 text-white rounded-lg px-4 py-2">${userMessage}</div>`;
+        chatBox.appendChild(userMessageDiv);
+
+        // Check for matching scenario
+        const scenario = scenarios.find(
+          (s) => s.input.toLowerCase() === userMessage.toLowerCase()
+        );
+
+        if (scenario) {
+          if (scenario.bias) {
+            // Display bias feedback
+            const feedbackMessage = document.createElement("div");
+            feedbackMessage.className = "text-left mb-4";
+            feedbackMessage.innerHTML = `<div class="inline-block bg-orange-500 text-gray-200 rounded-lg px-4 py-2">Bias Detected (${scenario.bias}): ${scenario.feedback}. Do you want to see the answer?</div>`;
+            chatBox.appendChild(feedbackMessage);
+
+            // Show Yes/No buttons
+            const buttonContainer = document.createElement("div");
+            buttonContainer.className = "text-left mb-4 flex space-x-4";
+
+            const yesButton = document.createElement("button");
+            yesButton.textContent = "Yes";
+            yesButton.className =
+              "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700";
+            yesButton.onclick = () => {
+              buttonContainer.remove();
+              displayTypingAnimation(scenario.response);
+            };
+
+            const noButton = document.createElement("button");
+            noButton.textContent = "No";
+            noButton.className =
+              "px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700";
+            noButton.onclick = () => {
+              buttonContainer.remove();
+              showRefinedPrompt(scenario);
+            };
+
+            buttonContainer.appendChild(yesButton);
+            buttonContainer.appendChild(noButton);
+            chatBox.appendChild(buttonContainer);
+          } else {
+            // No bias detected
+            const noBiasMessage = document.createElement("div");
+            noBiasMessage.className = "text-left mb-4";
+            noBiasMessage.innerHTML = `<div class="inline-block bg-green-500 text-white rounded-lg px-4 py-2">No bias detected.</div>`;
+            chatBox.appendChild(noBiasMessage);
+
+            // Display response
+            displayTypingAnimation(scenario.response);
+          }
+        } else {
+          displayTypingAnimation(
+            "Sorry, I am still learning and don't have a response for this input yet."
+          );
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+      }
+
+      function showRefinedPrompt(scenario) {
+        const chatBox = document.getElementById("chat-box");
+
+        const refinedPromptMessage = document.createElement("div");
+        refinedPromptMessage.className = "text-left mb-4";
+        refinedPromptMessage.innerHTML = `<div class="inline-block bg-gray-500 text-gray-200 rounded-lg px-4 py-2">Suggested refined prompt: ${scenario.refinedPrompt}. Do you want to continue with this refined prompt?</div>`;
+        chatBox.appendChild(refinedPromptMessage);
+
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "text-left mb-4 flex space-x-4";
+
+        const yesButton = document.createElement("button");
+        yesButton.textContent = "Yes";
+        yesButton.className =
+          "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700";
+        yesButton.onclick = () => {
+          buttonContainer.remove();
+          displayTypingAnimation(scenario.refinedResponse);
+        };
+
+        const noButton = document.createElement("button");
+        noButton.textContent = "No";
+        noButton.className =
+          "px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700";
+        noButton.onclick = () => {
+          buttonContainer.remove();
+          displayTips(scenario.feedback);
+        };
+
+        buttonContainer.appendChild(yesButton);
+        buttonContainer.appendChild(noButton);
+        chatBox.appendChild(buttonContainer);
+      }
+
+      function displayTypingAnimation(response) {
+        const chatBox = document.getElementById("chat-box");
+        const aiMessage = document.createElement("div");
+        aiMessage.className = "text-left mb-4";
+        const aiMessageContent = document.createElement("div");
+        aiMessageContent.className =
+          "inline-block bg-green-600 text-white rounded-lg px-4 py-2";
+        aiMessage.appendChild(aiMessageContent);
+        chatBox.appendChild(aiMessage);
+
+        let i = 0;
+        const typingEffect = setInterval(() => {
+          if (i < response.length) {
+            aiMessageContent.textContent += response.charAt(i);
+            i++;
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom during typing
+          } else {
+            clearInterval(typingEffect);
+          }
+        }, 50); // Typing speed
+      }
+
+      function displayTips(feedback) {
+        const chatBox = document.getElementById("chat-box");
+        const tipsMessage = document.createElement("div");
+        tipsMessage.className = "text-left mb-4";
+        tipsMessage.innerHTML = `<div class="inline-block bg-gray-500 text-gray-200 rounded-lg px-4 py-2">Tips: ${feedback} Consider rephrasing your input to eliminate bias.</div>`;
+        chatBox.appendChild(tipsMessage);
+      }
+    </script>
+  </body>
+</html>
