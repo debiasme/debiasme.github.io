@@ -1,0 +1,28 @@
+/* Fade-in animation */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+}
+
+/* Typing/Thinking Message Styles */
+.bg-gray-700 {
+    background-color: #374151;
+}
+
+.bg-green-600 {
+    background-color: #10b981;
+}
+
+.bg-blue-600 {
+    background-color: #3b82f6;
+}
