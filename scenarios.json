@@ -2,42 +2,42 @@
   {
     "input": "Why are all managers bad at their jobs?",
     "bias": "Overgeneralisation",
-    "feedback": "Your input may include an overgeneralisation. Consider rephrasing to ask a more balanced question.",
-    "response": "Not all managers are bad; some excel at leadership. Perhaps you could elaborate on what specific behaviours concern you.",
+    "feedback": "Your input assumes all managers perform poorly.",
+    "response": "Management effectiveness varies greatly between individuals and contexts.",
     "refinedPrompt": "What challenges do managers often face that may affect their performance?",
-    "refinedResponse": "Managers face diverse challenges such as resource constraints, team dynamics, and high expectations, which can impact their performance."
+    "refinedResponse": "Managers often face challenges in balancing team needs, resources, and organizational goals."
   },
   {
     "input": "Tell me why women are better leaders.",
     "bias": "Confirmation Bias",
-    "feedback": "This input may contain a biased assumption. Consider asking about leadership qualities instead.",
-    "response": "Leadership qualities are not determined by gender but by skills, experience, and context.",
+    "feedback": "Your input assumes inherent gender-based superiority in leadership.",
+    "response": "Effective leadership depends on individual skills and experience, not gender.",
     "refinedPrompt": "What leadership qualities contribute to effective leadership?",
-    "refinedResponse": "Effective leadership involves qualities like communication, adaptability, empathy, and decision-making skills, irrespective of gender."
+    "refinedResponse": "Key leadership qualities include communication, adaptability, and decision-making."
   },
   {
     "input": "Why do people from X country act rudely?",
     "bias": "Stereotyping",
-    "feedback": "Your input contains a stereotype. Consider asking about cultural differences more thoughtfully.",
-    "response": "Behaviour varies among individuals. Cultural differences exist, but it is essential to avoid generalisations.",
-    "refinedPrompt": "What are some cultural differences that can impact perceptions of politeness?",
-    "refinedResponse": "Cultural norms around communication styles, body language, and etiquette can shape perceptions of politeness."
+    "feedback": "Your input stereotypes an entire nationality.",
+    "response": "Behavior and politeness norms vary between individuals and cultures.",
+    "refinedPrompt": "What are some cultural differences in communication styles?",
+    "refinedResponse": "Different cultures have varying norms for polite communication and interaction."
   },
   {
     "input": "How can I measure employee productivity only by hours worked?",
     "bias": "McNamara Fallacy",
-    "feedback": "This input focuses only on quantitative measures. Consider including qualitative factors like engagement and creativity.",
-    "response": "Employee productivity cannot be fully captured by hours worked alone. Consider incorporating qualitative measures for a more complete analysis.",
+    "feedback": "Your input focuses solely on quantitative metrics.",
+    "response": "Hours worked is just one of many factors in measuring productivity.",
     "refinedPrompt": "What are effective ways to measure employee productivity holistically?",
-    "refinedResponse": "Holistic productivity measurement includes assessing task completion, innovation, collaboration, and overall impact alongside hours worked."
+    "refinedResponse": "Consider both quantitative metrics and qualitative factors like quality and innovation."
   },
   {
     "input": "Why are all students lazy nowadays?",
     "bias": "Overgeneralisation",
-    "feedback": "Your input may include an overgeneralisation. Consider rephrasing to focus on specific behaviours or trends.",
-    "response": "Not all students are lazy. It might help to explore specific challenges they face today.",
-    "refinedPrompt": "What challenges do students face that may affect their motivation?",
-    "refinedResponse": "Students face challenges like mental health issues, financial stress, and balancing work and studies, which can impact motivation."
+    "feedback": "Your input makes a broad generalization about modern students.",
+    "response": "Student motivation varies widely and is influenced by many factors.",
+    "refinedPrompt": "What factors affect student motivation today?",
+    "refinedResponse": "Modern students face unique challenges that can affect their engagement and performance."
   },
   {
     "input": "Why is automation always bad for jobs?",

@@ -1,208 +1,87 @@
-let scenarios = [];
-let isBiasCheckerEnabled = true;
+import { stateManager } from './stateManager.js';
+import { messageHandler } from './messageHandler.js';
+import { biasChecker } from './biasChecker.js';
 
-function toggleBiasChecker() {
-  isBiasCheckerEnabled = !isBiasCheckerEnabled;
-  const toggleButton = document.getElementById("toggle-bias-checker");
-  toggleButton.textContent = isBiasCheckerEnabled
-    ? "Disable Bias Checker"
-    : "Enable Bias Checker";
-  toggleButton.className = isBiasCheckerEnabled
-    ? "bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700"
-    : "bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700";
+// Initialize the application
+async function initializeApp() {
+  try {
+    // Load scenarios
+    const response = await fetch("scenarios.json");
+    const scenarios = await response.json();
+    stateManager.setState('scenarios', scenarios);
+
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Populate select dropdown
+    populateSelectDropdown(scenarios);
+  } catch (error) {
+    console.error('Failed to initialize app:', error);
+  }
 }
 
-async function loadScenarios() {
-  const response = await fetch("scenarios.json");
-  scenarios = await response.json();
+function setupEventListeners() {
+  // Select dropdown
+  document.getElementById("user-select").addEventListener("change", function() {
+    const userInput = document.getElementById("user-input");
+    userInput.value = this.value;
+    userInput.disabled = !!this.value;
+  });
 
-  const userSelect = document.getElementById("user-select");
-  scenarios.forEach((scenario) => {
-    const option = document.createElement("option");
-    option.value = scenario.input;
-    option.textContent = scenario.input;
-    userSelect.appendChild(option);
+  // Send button
+  document.getElementById("send-button").addEventListener("click", handleSendMessage);
+
+  // Toggle button
+  document.getElementById("toggle-bias-checker").addEventListener("click", () => {
+    biasChecker.toggleBiasChecker();
   });
 }
 
-loadScenarios();
+function populateSelectDropdown(scenarios) {
+  const select = document.getElementById("user-select");
+  scenarios.forEach(scenario => {
+    const option = document.createElement("option");
+    option.value = scenario.input;
+    option.textContent = scenario.input;
+    select.appendChild(option);
+  });
+}
 
-document.getElementById("user-select").addEventListener("change", function () {
-  const selectedMessage = this.value.trim();
+async function handleSendMessage() {
   const userInput = document.getElementById("user-input");
-
-  if (selectedMessage) {
-    userInput.value = selectedMessage;
-    userInput.disabled = true;
-  } else {
-    userInput.value = "";
-    userInput.disabled = false;
-  }
-});
-
-async function sendMessage() {
-  const userInputElement = document.getElementById("user-input");
-  const userMessage = userInputElement.value.trim();
-  const chatBox = document.getElementById("chat-box");
-
-  if (userMessage === "") {
-    alert("Please select or type a message.");
+  const message = userInput.value.trim();
+  
+  if (!message) {
+    alert("Please enter or select a message");
     return;
   }
 
-  const userMessageDiv = document.createElement("div");
-  userMessageDiv.className = "text-right";
-  userMessageDiv.innerHTML = `
-        <div class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md">
-            ${userMessage}
-        </div>`;
-  chatBox.appendChild(userMessageDiv);
+  // Display user message
+  const userMessageElement = messageHandler.createMessageElement('user-message', message);
+  messageHandler.appendToChatBox(userMessageElement);
 
-  if (isBiasCheckerEnabled) {
-    const scenario = scenarios.find(
-      (s) => s.input.toLowerCase() === userMessage.toLowerCase()
-    );
+  // Find matching scenario
+  const scenarios = stateManager.getState('scenarios');
+  const scenario = scenarios.find(s => s.input.toLowerCase() === message.toLowerCase());
 
-    if (scenario) {
-      if (scenario.bias) {
-        const feedbackMessage = document.createElement("div");
-        feedbackMessage.className = "text-left";
-        feedbackMessage.innerHTML = `
-                    <div class="inline-block bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md">
-                        Bias Detected (${scenario.bias}): ${scenario.feedback}. Do you want to see the answer?
-                    </div>`;
-        chatBox.appendChild(feedbackMessage);
-
-        const buttonContainer = document.createElement("div");
-        buttonContainer.className = "text-left flex space-x-4 mt-2";
-
-        const yesButton = document.createElement("button");
-        yesButton.textContent = "Yes";
-        yesButton.className =
-          "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700";
-        yesButton.onclick = () => {
-          buttonContainer.remove();
-          displayTypingAnimation(scenario.response);
-        };
-
-        const noButton = document.createElement("button");
-        noButton.textContent = "No";
-        noButton.className =
-          "bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700";
-        noButton.onclick = () => {
-          buttonContainer.remove();
-          showRefinedPrompt(scenario);
-        };
-
-        buttonContainer.appendChild(yesButton);
-        buttonContainer.appendChild(noButton);
-        chatBox.appendChild(buttonContainer);
-      } else {
-        const noBiasMessage = document.createElement("div");
-        noBiasMessage.className = "text-left";
-        noBiasMessage.innerHTML = `
-                    <div class="inline-block bg-green-500 text-white px-4 py-2 rounded-lg shadow-md">
-                        No bias detected.
-                    </div>`;
-        chatBox.appendChild(noBiasMessage);
-
-        displayTypingAnimation(scenario.response);
-      }
+  if (scenario) {
+    if (stateManager.getState('isBiasCheckerEnabled') && scenario.bias) {
+      await biasChecker.handleBiasCheck(scenario);
     } else {
-      displayTypingAnimation(
-        "Sorry, I am still learning and don't have a response for this input yet."
-      );
+      const aiMessage = messageHandler.createMessageElement('ai-message', scenario.response);
+      messageHandler.appendToChatBox(aiMessage);
     }
   } else {
-    const scenario = scenarios.find(
-      (s) => s.input.toLowerCase() === userMessage.toLowerCase()
+    const aiMessage = messageHandler.createMessageElement(
+      'ai-message', 
+      "I don't have a response for that input yet."
     );
-
-    if (scenario && scenario.response) {
-      displayTypingAnimation(scenario.response);
-    } else {
-      displayTypingAnimation(
-        "Sorry, I am still learning and don't have a response for this input yet."
-      );
-    }
+    messageHandler.appendToChatBox(aiMessage);
   }
 
-  chatBox.scrollTop = chatBox.scrollHeight;
+  // Clear input
+  userInput.value = '';
 }
 
-function showRefinedPrompt(scenario) {
-  const chatBox = document.getElementById("chat-box");
-
-  // Display notification for refined prompt
-  const refinedPromptNotification = document.createElement("div");
-  refinedPromptNotification.className = "text-left mt-4";
-  refinedPromptNotification.innerHTML = `
-        <div class="inline-block bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg shadow-md">
-            Refining prompt to: "${scenario.refinedPrompt}"
-        </div>`;
-  chatBox.appendChild(refinedPromptNotification);
-
-  // Create action buttons
-  const buttonContainer = document.createElement("div");
-  buttonContainer.className = "text-left flex space-x-4 mt-2";
-
-  const yesButton = document.createElement("button");
-  yesButton.textContent = "Yes";
-  yesButton.className =
-    "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700";
-  yesButton.onclick = () => {
-    buttonContainer.remove(); // Remove buttons after selection
-    displayTypingAnimation(scenario.refinedResponse); // Show refined response
-  };
-
-  const noButton = document.createElement("button");
-  noButton.textContent = "No";
-  noButton.className =
-    "bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700";
-  noButton.onclick = () => {
-    buttonContainer.remove(); // Remove buttons after selection
-    refinedPromptNotification.remove(); // Remove the refined prompt message
-    displayTips(scenario.feedback); // Show caution tips
-  };
-
-  buttonContainer.appendChild(yesButton);
-  buttonContainer.appendChild(noButton);
-  chatBox.appendChild(buttonContainer);
-
-  chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
-}
-
-function displayTypingAnimation(response) {
-  const chatBox = document.getElementById("chat-box");
-  const aiMessage = document.createElement("div");
-  aiMessage.className = "text-left mt-4";
-  const aiMessageContent = document.createElement("div");
-  aiMessageContent.className =
-    "inline-block bg-green-600 text-white px-4 py-2 rounded-lg shadow-md";
-  aiMessage.appendChild(aiMessageContent);
-  chatBox.appendChild(aiMessage);
-
-  let i = 0;
-  const typingEffect = setInterval(() => {
-    if (i < response.length) {
-      aiMessageContent.textContent += response.charAt(i);
-      i++;
-      chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
-    } else {
-      clearInterval(typingEffect);
-    }
-  }, 50); // Typing speed
-}
-
-function displayTips(feedback) {
-  const chatBox = document.getElementById("chat-box");
-  const tipsMessage = document.createElement("div");
-  tipsMessage.className = "text-left mt-4";
-  tipsMessage.innerHTML = `
-        <div class="inline-block bg-gray-500 text-gray-200 px-4 py-2 rounded-lg shadow-md">
-            Tips: ${feedback}. Consider rephrasing your input to eliminate bias.
-        </div>`;
-  chatBox.appendChild(tipsMessage);
-
-  chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
-}
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', initializeApp);
