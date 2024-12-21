@@ -32,3 +32,4 @@ function setupSendMessageListener() {
   document.getElementById("send-button")
     .addEventListener("click", sendMessage);
 } 
+
