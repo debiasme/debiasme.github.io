@@ -28,7 +28,7 @@ function setupEventListeners() {
   document.getElementById("user-select").addEventListener("change", function() {
     const userInput = document.getElementById("user-input");
     userInput.value = this.value;
-    userInput.disabled = !!this.value;
+    // userInput.disabled = !!this.value;
   });
 
   // Send button
@@ -39,18 +39,8 @@ function setupEventListeners() {
     biasChecker.toggleBiasChecker();
   });
 
-  // Toggle button for Azure API
-  document.getElementById("toggle-azure").addEventListener("click", () => {
-    console.log("Using Azure API:", !useAzure);
-    toggleAzureAPI();
-  });
-}
-
-function toggleAzureAPI() {
-  useAzure = !useAzure; // Toggle the useAzure flag
-  const button = document.getElementById("toggle-azure");
-  button.textContent = useAzure ? "Use Local API" : "Use Azure API";
-  button.className = useAzure ? "toggle-azure-enabled" : "toggle-azure-disabled"; // Update class based on state
+  // Detect bias button
+  document.getElementById("detect-bias-button").addEventListener("click", handleDetectBias);
 }
 
 function populateSelectDropdown(scenarios) {
@@ -61,6 +51,18 @@ function populateSelectDropdown(scenarios) {
     option.textContent = scenario.input;
     select.appendChild(option);
   });
+}
+
+// Add this function to create thinking animation
+function createThinkingAnimation() {
+  const thinking = document.createElement('div');
+  thinking.className = 'thinking';
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    thinking.appendChild(dot);
+  }
+  return thinking;
 }
 
 async function handleSendMessage() {
@@ -76,59 +78,130 @@ async function handleSendMessage() {
   const userMessageElement = messageHandler.createMessageElement('user-message', message);
   messageHandler.appendToChatBox(userMessageElement);
 
-  // Check if using Azure API
-  if (useAzure) {
-    await handleAzureResponse(message); // Call the new function for Azure API
-  } else {
-    // Find matching scenario
-    const scenarios = stateManager.getState('scenarios');
-    const scenario = scenarios.find(s => s.input.toLowerCase() === message.toLowerCase());
+  // Show thinking animation in chat
+  const thinking = createThinkingAnimation();
+  messageHandler.appendToChatBox(thinking);
 
-    if (scenario) {
-      if (stateManager.getState('isBiasCheckerEnabled') && scenario.bias) {
-        await biasChecker.handleBiasCheck(scenario);
-      } else {
-        const aiMessage = messageHandler.createMessageElement('ai-message', scenario.response);
-        messageHandler.appendToChatBox(aiMessage);
-      }
-    } else {
-      const aiMessage = messageHandler.createMessageElement(
-        'ai-message', 
-        "I don't have a response for that input yet."
-      );
-      messageHandler.appendToChatBox(aiMessage);
-    }
-  }
+  // Send message to Azure
+  await handleAzureResponse(message);
 
-  // Clear input
+  // Clear input and remove any highlight container
   userInput.value = '';
+  const highlightContainer = document.querySelector('.highlight-container');
+  if (highlightContainer) {
+    highlightContainer.remove();
+    userInput.style.display = 'block';
+  }
 }
 
 // Function to handle Azure API response
 async function handleAzureResponse(userMessage) {
   try {
-    const response = await fetch("http://localhost:3000/api/process", { // Include the full URL
+    const response = await fetch("http://localhost:3000/api/process", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input: userMessage }), // Send the user message as input
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ input: userMessage }),
     });
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error?.message || 'Failed to process the request');
     }
 
-    const result = await response.json();
+    // Remove thinking animation if it exists
+    const thinking = document.querySelector('.thinking');
+    if (thinking) {
+      thinking.remove();
+    }
 
     // Display AI response
-    const aiMessage = messageHandler.createMessageElement('ai-message', result.response);
+    const aiMessage = messageHandler.createMessageElement('ai-message', data.response);
     messageHandler.appendToChatBox(aiMessage);
+
   } catch (error) {
     console.error('Error processing Azure response:', error);
-    const aiMessage = messageHandler.createMessageElement(
-      'ai-message', 
-      "Sorry, there was an error processing your request."
+    
+    // Remove thinking animation if it exists
+    const thinking = document.querySelector('.thinking');
+    if (thinking) {
+      thinking.remove();
+    }
+    
+    // Create error message
+    const errorMessage = messageHandler.createMessageElement(
+      'ai-message error-message',
+      error.message || "Sorry, there was an error processing your request."
     );
-    messageHandler.appendToChatBox(aiMessage);
+    messageHandler.appendToChatBox(errorMessage);
+  }
+}
+
+async function handleDetectBias() {
+  const userInput = document.getElementById("user-input");
+  const message = userInput.value.trim();
+  
+  if (!message) {
+    alert("Please enter a message to analyze");
+    return;
+  }
+
+  try {
+    // Remove any existing highlight container
+    const existingContainer = document.querySelector('.highlight-container');
+    if (existingContainer) {
+      existingContainer.remove();
+      userInput.style.display = 'block';
+      return;
+    }
+
+    // Show thinking animation
+    const inputWrapper = userInput.closest('.input-wrapper');
+    const thinking = createThinkingAnimation();
+    inputWrapper.insertBefore(thinking, userInput);
+
+    const analyzedContent = await biasChecker.handleBiasCheck(message, userInput);
+    
+    // Remove thinking animation
+    thinking.remove();
+
+    if (analyzedContent.textContent === message) {
+      // No bias detected
+      const noBiasMessage = document.createElement('div');
+      noBiasMessage.className = 'no-bias-message';
+      noBiasMessage.textContent = 'No bias detected in your message';
+      inputWrapper.insertBefore(noBiasMessage, userInput);
+
+      // Automatically send the message after a brief delay
+      setTimeout(async () => {
+        noBiasMessage.remove();
+        await handleSendMessage();
+      }, 1500);
+    } else {
+      // Bias detected - show highlights
+      const highlightContainer = document.createElement('div');
+      highlightContainer.className = 'highlight-container';
+      highlightContainer.appendChild(analyzedContent);
+      
+      inputWrapper.insertBefore(highlightContainer, userInput);
+      userInput.style.display = 'none';
+      
+      // Add a close button to restore input
+      const closeButton = document.createElement('button');
+      closeButton.className = 'close-highlight';
+      closeButton.innerHTML = '×';
+      closeButton.onclick = () => {
+        highlightContainer.remove();
+        userInput.style.display = 'block';
+      };
+      highlightContainer.appendChild(closeButton);
+    }
+  } catch (error) {
+    console.error('Error in handleDetectBias:', error);
+    alert('Sorry, there was an error analyzing your message.');
   }
 }
 

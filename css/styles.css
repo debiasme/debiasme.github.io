@@ -361,3 +361,297 @@ body {
     margin: 0;
     box-sizing: border-box;
 }
+
+.bias-highlight {
+    background-color: rgba(236, 72, 153, 0.2);
+    border-bottom: 1px dashed #ec4899;
+    position: relative;
+    cursor: help;
+    padding: 2px 4px;
+    margin: -2px -4px;
+}
+
+.bias-highlight.active {
+    background-color: rgba(236, 72, 153, 0.3);
+}
+
+.bias-highlight.active .bias-tooltip {
+    display: block;
+    pointer-events: auto;
+}
+
+.bias-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px;
+    background-color: #1f2937;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+    max-width: 250px;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Create a safe hover area between highlight and tooltip */
+.bias-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: transparent;
+}
+
+/* Create a larger hit area around the tooltip */
+.bias-tooltip::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    z-index: -1;
+}
+
+.bias-text-container {
+    width: 100%;
+    line-height: 1.5;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.bias-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px;
+    background-color: #1f2937;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+    width: max-content;
+    max-width: 250px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bias-tooltip-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.edit-button, .tips-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: white;
+    transition: transform 0.1s ease-in-out;
+}
+
+.edit-button {
+    background-color: #3b82f6;
+}
+
+.tips-button {
+    background-color: #8b5cf6;
+}
+
+.edit-suggestion {
+    margin-top: 8px;
+    padding: 8px;
+    background-color: #374151;
+    border-radius: 4px;
+}
+
+.confirm-edit {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+.highlight-container {
+    width: 100%;
+    min-height: 40px;
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.bias-text-container {
+    width: 100%;
+    line-height: 1.5;
+    position: relative;
+    display: inline-block;
+}
+
+/* Adjust the tooltip position */
+.bias-highlight {
+    position: relative;
+    display: inline-block;
+}
+
+.bias-tooltip {
+    min-width: 200px;
+    text-align: left;
+    bottom: calc(100% + 10px);
+}
+
+/* Style for Detect Bias button */
+#detect-bias-button {
+    background-color: #8b5cf6;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+#detect-bias-button:hover {
+    background-color: #7c3aed;
+    transform: translateY(-1px);
+}
+
+#detect-bias-button:active {
+    transform: translateY(0);
+}
+
+/* Fix for tooltip interaction */
+.bias-highlight.active .bias-tooltip {
+    display: block;
+}
+
+/* Add hover area to prevent tooltip from disappearing */
+.bias-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+}
+
+.close-highlight {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.close-highlight:hover {
+    background-color: #4b5563;
+    color: white;
+}
+
+.highlight-container {
+    position: relative;
+    /* ... existing styles ... */
+}
+
+/* Style improvements for buttons */
+.edit-button:hover, .tips-button:hover {
+    transform: translateY(-1px);
+}
+
+.edit-button:active, .tips-button:active {
+    transform: translateY(0);
+}
+
+/* Thinking Animation */
+.thinking {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px;
+    background-color: #4b5563;
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { 
+        transform: scale(0);
+    } 
+    40% { 
+        transform: scale(1.0);
+    }
+}
+
+/* No Bias Message */
+.no-bias-message {
+    background-color: #059669;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.no-bias-message::before {
+    content: '✓';
+    font-weight: bold;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.error-message .message-content {
+    background-color: #ef4444;
+    border-left: 4px solid #dc2626;
+    color: white;
+}
+
+.error-message .message-content::before {
+    content: '⚠️ ';
+    margin-right: 8px;
+}

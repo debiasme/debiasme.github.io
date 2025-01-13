@@ -8,6 +8,21 @@ import { BiasVisualizer } from './biasVisualizer.js';
 class BiasChecker {
   constructor() {
     this.visualizer = new BiasVisualizer();
+    this.systemPrompt = `You are a bias detection system. Analyze the following text for potential biases including gender, racial, age, cultural, and socioeconomic biases. 
+    For each bias found, provide the biased phrase, type of bias, and a suggested alternative.
+    
+    You must respond with valid JSON in the following format only:
+    {
+      "biases": [
+        {
+          "phrase": "exact biased text from input",
+          "type": "type of bias",
+          "suggestion": "suggested alternative phrasing"
+        }
+      ]
+    }
+    
+    If no biases are found, respond with: {"biases": []}`;
   }
 
   /**
@@ -22,21 +37,47 @@ class BiasChecker {
     button.className = !currentState ? 'bias-checker-enabled' : 'bias-checker-disabled';
   }
 
+  async analyzeText(text) {
+    try {
+      const response = await fetch('http://localhost:3000/api/analyze-bias', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          systemPrompt: this.systemPrompt,
+          userInput: text
+        })
+      });
+
+      if (!response.ok) {
+        console.error(`HTTP error! status: ${response.status}`);
+        return { biases: [] };
+      }
+
+      const analysis = await response.json();
+      return analysis;
+    } catch (error) {
+      console.error('Error analyzing bias:', error);
+      return { biases: [] };
+    }
+  }
+
   /**
    * Handle bias detection for a scenario
    * @param {Object} scenario - Scenario to check for bias
    */
-  async handleBiasCheck(scenario) {
-    // Show bias warning
-    const warningMessage = messageHandler.createMessageElement(
-      'ai-message',
-      `Your prompt contains ${scenario.bias} bias.<br/>Would you like to refine your prompt to: "${scenario.refinedPrompt}"?`
-    );
-    messageHandler.appendToChatBox(warningMessage);
+  async handleBiasCheck(text, inputElement) {
+    if (!stateManager.getState('isBiasCheckerEnabled')) {
+      return document.createTextNode(text);
+    }
 
-    // Add choice buttons
-    const choiceButtons = this.createChoiceButtons(scenario);
-    messageHandler.appendToChatBox(choiceButtons);
+    const analysis = await this.analyzeText(text);
+    if (!analysis || !analysis.biases || analysis.biases.length === 0) {
+      return document.createTextNode(text);
+    }
+
+    return this.visualizer.highlightBiases(text, analysis.biases, inputElement);
   }
 
   /**

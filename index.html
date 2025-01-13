@@ -20,19 +20,17 @@
             <button id="toggle-bias-checker" class="bias-checker-enabled">
               Disable Bias Checker
             </button>
-            <button id="toggle-azure" class="toggle-azure-button">
-              Use Azure API
-            </button>
           </div>
           <select id="user-select">
             <option value="">-- Select a message --</option>
           </select>
-          <input
-            id="user-input"
-            type="text"
-            placeholder="Type your message here..."
-          />
-          <button id="send-button">Send</button>
+          <div class="input-wrapper">
+            <input id="user-input" type="text" placeholder="Type your message here..." />
+            <div class="input-buttons">
+              <button id="detect-bias-button">Detect Bias</button>
+              <button id="send-button">Send</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
