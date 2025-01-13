@@ -1,4 +1,5 @@
 import { stateManager } from './stateManager.js';
+import { BiasMap } from './biasMap.js';
 
 /**
  * Message handling utilities
@@ -8,16 +9,47 @@ class MessageHandler {
    * Create a new message element
    * @param {string} className - CSS class for the message
    * @param {string} content - Message content
+   * @param {Array} biases - Array of biases
    * @returns {HTMLElement} Created message element
    */
-  createMessageElement(className, content) {
+  createMessageElement(className, content, biases = null) {
     try {
+      console.log('Creating message element:', {
+        className,
+        contentLength: content.length,
+        hasBiases: biases && biases.length > 0,
+        numberOfBiases: biases?.length
+      });
+
       const element = document.createElement("div");
       element.className = className;
-      element.innerHTML = `
-        <div class="message-content animate-fade-in">
-          ${this.sanitizeContent(content)}
-        </div>`;
+      
+      const messageContent = document.createElement("div");
+      messageContent.className = "message-content animate-fade-in";
+      messageContent.innerHTML = this.sanitizeContent(content);
+      element.appendChild(messageContent);
+
+      if (biases && biases.length > 0) {
+        const mapContainer = document.createElement("div");
+        mapContainer.className = "bias-map-container";
+        element.appendChild(mapContainer);
+
+        const biasMap = new BiasMap(mapContainer);
+        biasMap.updateMap(biases);
+        
+        // Connect the message content with the bias map
+        biasMap.setMessageContent(messageContent);
+
+        // Add all bias phrases as highlights (initially inactive)
+        biases.forEach(bias => {
+          const phrase = bias.phrase;
+          const regex = new RegExp(phrase, 'g');
+          messageContent.innerHTML = messageContent.innerHTML.replace(
+            regex,
+            `<span class="bias-highlight" data-bias-type="${bias.type}">${phrase}</span>`
+          );
+        });
+      }
 
       if (className === 'ai-message' || className === 'user-message') {
         const row = document.createElement('div');
@@ -28,7 +60,6 @@ class MessageHandler {
       return element;
     } catch (error) {
       console.error('Error creating message element:', error);
-      stateManager.setState('error', 'Failed to create message');
       return null;
     }
   }

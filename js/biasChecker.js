@@ -1,6 +1,6 @@
-import { stateManager } from './stateManager.js';
-import { messageHandler } from './messageHandler.js';
-import { BiasVisualizer } from './biasVisualizer.js';
+import { stateManager } from "./stateManager.js";
+import { messageHandler } from "./messageHandler.js";
+import { BiasVisualizer } from "./biasVisualizer.js";
 
 /**
  * BiasChecker class to handle bias detection and response
@@ -8,7 +8,9 @@ import { BiasVisualizer } from './biasVisualizer.js';
 class BiasChecker {
   constructor() {
     this.visualizer = new BiasVisualizer();
-    this.systemPrompt = `You are a bias detection system. Analyze the following text for potential biases including gender, racial, age, cultural, and socioeconomic biases. 
+    this.systemPrompt = `You are a bias detection system. Analyze the following text for potential biases. 
+    Potential biases include but not limited to gender, age, racial, cultural, anchoring, confirmation bias, human bias, availability bias, framing bias, loss aversion, Status Quo Bias, Observational Bias (Streetlight Effect), McNamara Fallacy, Groupthink etc.
+
     For each bias found, provide the biased phrase, type of bias, and a suggested alternative.
     
     You must respond with valid JSON in the following format only:
@@ -22,32 +24,38 @@ class BiasChecker {
       ]
     }
     
-    If no biases are found, respond with: {"biases": []}`;
-  }
+    If no biases are found, respond with: {"biases": []}
+    
+    Your response must contains phrases with some of these biases `; //TODO: Check this line
+  } 
 
   /**
    * Toggle bias checker state
    */
   toggleBiasChecker() {
-    const currentState = stateManager.getState('isBiasCheckerEnabled');
-    stateManager.setState('isBiasCheckerEnabled', !currentState);
-    
-    const button = document.getElementById('toggle-bias-checker');
-    button.textContent = !currentState ? 'Disable Bias Checker' : 'Enable Bias Checker';
-    button.className = !currentState ? 'bias-checker-enabled' : 'bias-checker-disabled';
+    const currentState = stateManager.getState("isBiasCheckerEnabled");
+    stateManager.setState("isBiasCheckerEnabled", !currentState);
+
+    const button = document.getElementById("toggle-bias-checker");
+    button.textContent = !currentState
+      ? "Disable Bias Checker"
+      : "Enable Bias Checker";
+    button.className = !currentState
+      ? "bias-checker-enabled"
+      : "bias-checker-disabled";
   }
 
   async analyzeText(text) {
     try {
-      const response = await fetch('http://localhost:3000/api/analyze-bias', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/api/analyze-bias", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           systemPrompt: this.systemPrompt,
-          userInput: text
-        })
+          userInput: text,
+        }),
       });
 
       if (!response.ok) {
@@ -58,7 +66,7 @@ class BiasChecker {
       const analysis = await response.json();
       return analysis;
     } catch (error) {
-      console.error('Error analyzing bias:', error);
+      console.error("Error analyzing bias:", error);
       return { biases: [] };
     }
   }
@@ -68,7 +76,7 @@ class BiasChecker {
    * @param {Object} scenario - Scenario to check for bias
    */
   async handleBiasCheck(text, inputElement) {
-    if (!stateManager.getState('isBiasCheckerEnabled')) {
+    if (!stateManager.getState("isBiasCheckerEnabled")) {
       return document.createTextNode(text);
     }
 
@@ -86,17 +94,17 @@ class BiasChecker {
    * @returns {Element} - Choice buttons container
    */
   createChoiceButtons(scenario) {
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'choice-buttons';
-    
-    const yesButton = document.createElement('button');
-    yesButton.className = 'yes-button';
-    yesButton.textContent = 'Yes';
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "choice-buttons";
+
+    const yesButton = document.createElement("button");
+    yesButton.className = "yes-button";
+    yesButton.textContent = "Yes";
     yesButton.onclick = () => this.handleRefinedPrompt(scenario);
 
-    const noButton = document.createElement('button');
-    noButton.className = 'no-button';
-    noButton.textContent = 'No';
+    const noButton = document.createElement("button");
+    noButton.className = "no-button";
+    noButton.textContent = "No";
     noButton.onclick = () => this.handleUnrefinedPrompt(scenario);
 
     buttonContainer.appendChild(yesButton);
@@ -111,14 +119,14 @@ class BiasChecker {
   handleRefinedPrompt(scenario) {
     // Show refined prompt
     const refinedMessage = messageHandler.createMessageElement(
-      'user-message',
+      "user-message",
       scenario.refinedPrompt
     );
     messageHandler.appendToChatBox(refinedMessage);
 
     // Show refined response
     const responseMessage = messageHandler.createMessageElement(
-      'ai-message',
+      "ai-message",
       scenario.refinedResponse
     );
     messageHandler.appendToChatBox(responseMessage);
@@ -129,22 +137,25 @@ class BiasChecker {
    * @param {Object} scenario - Scenario to check for bias
    */
   handleUnrefinedPrompt(scenario) {
-    const messageRow = document.createElement('div');
-    messageRow.className = 'message-row';
+    const messageRow = document.createElement("div");
+    messageRow.className = "message-row";
 
     // Show response
     const responseMessage = messageHandler.createMessageElement(
-      'ai-message',
+      "ai-message",
       scenario.response
     );
     messageRow.appendChild(responseMessage);
 
     // Show visualization
-    const visualization = this.visualizer.visualizeBias(scenario.input, scenario.bias);
+    const visualization = this.visualizer.visualizeBias(
+      scenario.input,
+      scenario.bias
+    );
     messageRow.appendChild(visualization);
 
     messageHandler.appendToChatBox(messageRow);
   }
 }
 
-export const biasChecker = new BiasChecker(); 
+export const biasChecker = new BiasChecker();

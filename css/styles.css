@@ -41,14 +41,13 @@ body {
 /* Message Layout */
 .message-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: flex-start;
-    gap: 20px;
+    gap: 30px;
     margin: 20px 0;
-    width: calc(100% - 40px);
+    width: 100%;
     position: relative;
-    min-height: 80px;
-    flex-direction: row;
+    padding-right: 20px;
 }
 
 .message-content {
@@ -80,8 +79,8 @@ body {
     text-align: left;
     width: fit-content;
     max-width: 45%;
+    flex-shrink: 0;
     align-self: flex-start;
-    margin-right: auto;
 }
 
 .ai-message .message-content {
@@ -363,16 +362,17 @@ body {
 }
 
 .bias-highlight {
-    background-color: rgba(236, 72, 153, 0.2);
-    border-bottom: 1px dashed #ec4899;
     position: relative;
-    cursor: help;
-    padding: 2px 4px;
-    margin: -2px -4px;
+    transition: all 0.3s ease;
+    opacity: 0.7;
 }
 
 .bias-highlight.active {
-    background-color: rgba(236, 72, 153, 0.3);
+    background-color: rgba(74, 158, 255, 0.2);
+    border-bottom: 2px solid #4a9eff;
+    opacity: 1;
+    padding: 2px 4px;
+    margin: -2px -4px;
 }
 
 .bias-highlight.active .bias-tooltip {
@@ -654,4 +654,170 @@ body {
 .error-message .message-content::before {
     content: '⚠️ ';
     margin-right: 8px;
+}
+
+/* Bias Map Styles */
+.bias-map-container {
+    position: absolute;
+    left: calc(45% + 50px);
+    top: 0;
+    width: 45%;
+    min-height: 200px;
+    background-color: rgba(26, 26, 26, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.bias-map {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+}
+
+.bias-map-link {
+    stroke: #4a9eff;
+    stroke-width: 1.5px;
+    stroke-opacity: 0.6;
+    transition: stroke-opacity 0.3s ease;
+}
+
+.bias-map-link:hover {
+    stroke-opacity: 1;
+}
+
+.bias-map-circle {
+    stroke: rgba(74, 158, 255, 0.2);
+    stroke-width: 4px;
+    transition: all 0.3s ease;
+}
+
+.bias-map-circle.center {
+    fill: #4a9eff;
+    r: 10;
+}
+
+.bias-map-circle.bias {
+    fill: #4a9eff;
+    r: 8;
+}
+
+.bias-map-label {
+    fill: #fff;
+    text-anchor: middle;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.bias-map-tooltip {
+    position: absolute;
+    background-color: rgba(17, 24, 39, 0.95);
+    color: white;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    pointer-events: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    max-width: 300px;
+    border: 1px solid rgba(74, 158, 255, 0.2);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.bias-map-tooltip[data-editing="true"] .edit-suggestion {
+    display: block;
+}
+
+.bias-map-tooltip .edit-suggestion {
+    display: none;
+}
+
+.bias-map-tooltip-content h3 {
+    margin: 0 0 12px 0;
+    color: #a78bfa;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.bias-phrase {
+    font-style: italic;
+    margin: 12px 0;
+    color: #e5e7eb;
+    padding: 8px;
+    background-color: #374151;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.bias-map-node {
+    cursor: pointer;
+}
+
+.bias-map-node:hover .bias-map-circle {
+    fill: #6eb4ff;
+    stroke: rgba(74, 158, 255, 0.4);
+    stroke-width: 6px;
+}
+
+.bias-map-node:hover + .bias-map-link {
+    stroke-opacity: 1;
+}
+
+/* Button Styles in Tooltip */
+.bias-tooltip-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.edit-button, .tips-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: white;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.edit-button {
+    background-color: #3b82f6;
+}
+
+.tips-button {
+    background-color: #8b5cf6;
+}
+
+.edit-button:hover, .tips-button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.edit-suggestion {
+    margin-top: 12px;
+    padding: 12px;
+    background-color: #374151;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.confirm-edit {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-top: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.confirm-edit:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
 }

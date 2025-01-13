@@ -97,6 +97,8 @@ async function handleSendMessage() {
 // Function to handle Azure API response
 async function handleAzureResponse(userMessage) {
   try {
+    console.log('Sending message to server:', userMessage);
+    
     const response = await fetch("http://localhost:3000/api/process", {
       method: "POST",
       headers: { 
@@ -107,6 +109,7 @@ async function handleAzureResponse(userMessage) {
     });
 
     const data = await response.json();
+    console.log('Received response from server:', data);
 
     if (!data.success) {
       throw new Error(data.error?.message || 'Failed to process the request');
@@ -118,9 +121,23 @@ async function handleAzureResponse(userMessage) {
       thinking.remove();
     }
 
-    // Display AI response
-    const aiMessage = messageHandler.createMessageElement('ai-message', data.response);
+    // Log bias information
+    if (data.biases && data.biases.length > 0) {
+      console.log('Biases detected:', data.biases);
+    } else {
+      console.log('No biases detected in the response');
+    }
+
+    // Display AI response with biases
+    const aiMessage = messageHandler.createMessageElement(
+      'ai-message',
+      data.response,
+      data.biases
+    );
+    console.log('Created message element with biases');
+    
     messageHandler.appendToChatBox(aiMessage);
+    console.log('Appended message to chat box');
 
   } catch (error) {
     console.error('Error processing Azure response:', error);
