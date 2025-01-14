@@ -109,7 +109,7 @@ async function handleAzureResponse(userMessage) {
     
     const apiUrl = environment.isDevelopment 
       ? 'http://localhost:3000' 
-      : 'https://your-app-name.onrender.com';
+      : 'https://ayeeye.onrender.com';
     
     const response = await fetch(`${apiUrl}/api/process`, {
       method: "POST",
