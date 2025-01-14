@@ -14,7 +14,9 @@ const isDev = process.env.NODE_ENV !== 'production';
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5501',
-  'http://127.0.0.1:5501'
+  'http://127.0.0.1:5501',
+  'https://cmlmanni.github.io',
+  'https://cmlmanni.github.io/AyeEye'  // Add your GitHub Pages URL
 ];
 
 app.use(cors({
@@ -28,7 +30,10 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 }));
 app.use(express.json());
 
