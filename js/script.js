@@ -9,8 +9,10 @@ let useAzure = false; // Initialize useAzure flag
 // Initialize the application
 async function initializeApp() {
   try {
-    // Load scenarios
-    const response = await fetch("../scenarios.json");
+    // Load scenarios with path handling for GitHub Pages
+    const basePath = window.location.hostname === 'cmlmanni.github.io' ? '/AyeEye' : '';
+    const response = await fetch(`${basePath}/scenarios.json`);
+    
     if (!response.ok) {
       throw new Error(`Failed to load scenarios: ${response.statusText}`);
     }
@@ -25,7 +27,7 @@ async function initializeApp() {
     populateSelectDropdown(scenarios);
   } catch (error) {
     console.error('Failed to initialize app:', error);
-    stateManager.setState('error', 'Failed to load scenarios');
+    stateManager.setState('error', 'Failed to initialize application');
   }
 }
 
