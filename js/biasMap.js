@@ -46,9 +46,10 @@ export class BiasMap {
     };
     this.nodes.push(centralNode);
 
-    // Create nodes in a V shape
+    // Adjust spacing based on screen size
+    const isMobile = window.innerWidth <= 768;
+    const radius = isMobile ? 70 : 100;
     const angleStep = Math.PI / (biases.length + 1);
-    const radius = 100;
     
     biases.forEach((bias, index) => {
         const angle = Math.PI / 2 + angleStep * (index + 1);
@@ -61,6 +62,8 @@ export class BiasMap {
             label: bias.type,
             phrase: bias.phrase,
             suggestion: bias.suggestion,
+            fx: isMobile ? x : undefined,
+            fy: isMobile ? y : undefined,
             x: x,
             y: y
         };
@@ -71,6 +74,13 @@ export class BiasMap {
             value: 1
         });
     });
+
+    // Adjust simulation forces for mobile
+    if (isMobile) {
+        this.simulation
+            .force("charge", d3.forceManyBody().strength(-30))
+            .force("link", d3.forceLink().id(d => d.id).distance(50));
+    }
 
     this.renderMap();
   }

@@ -35,17 +35,52 @@ class BiasChecker {
   setupTouchEvents() {
     const detectButton = document.getElementById("detect-bias-button");
     if (detectButton) {
-      // Handle both touch and click events
-      detectButton.addEventListener('touchstart', async (e) => {
-        e.preventDefault(); // Prevent double-firing on mobile
-        const input = document.getElementById("user-input");
-        if (!input || !input.value.trim()) return;
+        // Remove any existing listeners
+        const newButton = detectButton.cloneNode(true);
+        detectButton.parentNode.replaceChild(newButton, detectButton);
+        
+        // Add both touch and click handlers
+        newButton.addEventListener('touchend', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await this.handleDetectBias();
+        }, { passive: false });
+
+        newButton.addEventListener('click', async (e) => {
+            await this.handleDetectBias();
+        });
+    }
+  }
+
+  async handleDetectBias() {
+    const input = document.getElementById("user-input");
+    if (!input || !input.value.trim()) return;
+
+    try {
+        // Show loading state
+        const detectButton = document.getElementById("detect-bias-button");
+        const originalText = detectButton.textContent;
+        detectButton.textContent = "Detecting...";
+        detectButton.disabled = true;
 
         const result = await this.handleBiasCheck(input.value, input);
+        
+        // Reset button state
+        detectButton.textContent = originalText;
+        detectButton.disabled = false;
+
         if (result) {
-          input.parentNode.replaceChild(result, input);
+            const container = document.createElement('div');
+            container.className = 'input-container';
+            container.appendChild(result);
+            input.parentNode.replaceChild(container, input);
         }
-      });
+    } catch (error) {
+        console.error('Error in handleDetectBias:', error);
+        // Reset button state on error
+        const detectButton = document.getElementById("detect-bias-button");
+        detectButton.textContent = "Detect Bias";
+        detectButton.disabled = false;
     }
   }
 
@@ -67,29 +102,34 @@ class BiasChecker {
 
   async analyzeText(text) {
     try {
-      console.log('Analyzing text:', text); // Add logging
-      const response = await fetch("http://localhost:3000/api/analyze-bias", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          systemPrompt: this.systemPrompt,
-          userInput: text,
-        }),
-      });
+        console.log('Analyzing text:', text);
+        const apiUrl = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000/api/analyze-bias'
+            : 'https://ayeeye.onrender.com/api/analyze-bias';
 
-      if (!response.ok) {
-        console.error(`HTTP error! status: ${response.status}`);
-        return { biases: [] };
-      }
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                systemPrompt: this.systemPrompt,
+                userInput: text,
+            }),
+        });
 
-      const analysis = await response.json();
-      console.log('Analysis response:', analysis); // Add logging
-      return analysis;
+        if (!response.ok) {
+            console.error(`HTTP error! status: ${response.status}`);
+            return { biases: [] };
+        }
+
+        const analysis = await response.json();
+        console.log('Analysis response:', analysis);
+        return analysis;
     } catch (error) {
-      console.error("Error analyzing bias:", error);
-      return { biases: [] };
+        console.error("Error analyzing bias:", error);
+        return { biases: [] };
     }
   }
 
