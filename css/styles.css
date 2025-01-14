@@ -364,12 +364,12 @@ body {
 .bias-highlight {
     position: relative;
     transition: all 0.3s ease;
-    opacity: 0.7;
+    opacity: 0.8;
 }
 
 .bias-highlight.active {
-    background-color: rgba(74, 158, 255, 0.2);
-    border-bottom: 2px solid #4a9eff;
+    background-color: rgba(239, 68, 68, 0.2); /* Red background */
+    border-bottom: 2px solid #ef4444; /* Red underline */
     opacity: 1;
     padding: 2px 4px;
     margin: -2px -4px;
@@ -686,28 +686,27 @@ body {
 }
 
 .bias-map-circle {
-    stroke: rgba(74, 158, 255, 0.2);
-    stroke-width: 4px;
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 3px;
     transition: all 0.3s ease;
 }
 
 .bias-map-circle.center {
-    fill: #4a9eff;
-    r: 10;
+    fill: #6366f1; /* Indigo for center node */
+    r: 12;
 }
 
 .bias-map-circle.bias {
-    fill: #4a9eff;
-    r: 8;
+    fill: #ef4444; /* Red for bias nodes */
+    r: 10;
 }
 
 .bias-map-label {
     fill: #fff;
     text-anchor: middle;
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0.9;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    font-size: 14px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .bias-map-tooltip {
@@ -820,4 +819,72 @@ body {
 .confirm-edit:hover {
     background-color: #059669;
     transform: translateY(-1px);
+}
+
+/* Custom Tooltip Dialog */
+.bias-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #1f2937;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    z-index: 1100;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+}
+
+.bias-dialog-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bias-dialog-content {
+    color: #e5e7eb;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.bias-dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.bias-dialog-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bias-dialog-button.primary {
+    background-color: #6366f1;
+    color: white;
+}
+
+.bias-dialog-button.secondary {
+    background-color: #4b5563;
+    color: white;
+}
+
+.bias-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
 }

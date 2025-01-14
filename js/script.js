@@ -1,6 +1,7 @@
 import { stateManager } from './stateManager.js';
 import { messageHandler } from './messageHandler.js';
 import { biasChecker } from './biasChecker.js';
+import { environment } from './environment.js';
 
 // Global variable to track Azure API usage
 let useAzure = false; // Initialize useAzure flag
@@ -9,9 +10,13 @@ let useAzure = false; // Initialize useAzure flag
 async function initializeApp() {
   try {
     // Load scenarios
-    const response = await fetch("scenarios.json");
+    const response = await fetch("/scenarios.json");
+    if (!response.ok) {
+      throw new Error(`Failed to load scenarios: ${response.statusText}`);
+    }
     const scenarios = await response.json();
     stateManager.setState('scenarios', scenarios);
+    console.log('Loaded scenarios:', scenarios);
 
     // Set up event listeners
     setupEventListeners();
@@ -20,6 +25,7 @@ async function initializeApp() {
     populateSelectDropdown(scenarios);
   } catch (error) {
     console.error('Failed to initialize app:', error);
+    stateManager.setState('error', 'Failed to load scenarios');
   }
 }
 
@@ -99,7 +105,11 @@ async function handleAzureResponse(userMessage) {
   try {
     console.log('Sending message to server:', userMessage);
     
-    const response = await fetch("http://localhost:3000/api/process", {
+    const apiUrl = environment.isDevelopment 
+      ? 'http://localhost:3000' 
+      : 'https://your-app-name.onrender.com';
+    
+    const response = await fetch(`${apiUrl}/api/process`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -115,17 +125,10 @@ async function handleAzureResponse(userMessage) {
       throw new Error(data.error?.message || 'Failed to process the request');
     }
 
-    // Remove thinking animation if it exists
+    // Remove thinking animation
     const thinking = document.querySelector('.thinking');
     if (thinking) {
       thinking.remove();
-    }
-
-    // Log bias information
-    if (data.biases && data.biases.length > 0) {
-      console.log('Biases detected:', data.biases);
-    } else {
-      console.log('No biases detected in the response');
     }
 
     // Display AI response with biases
@@ -134,21 +137,14 @@ async function handleAzureResponse(userMessage) {
       data.response,
       data.biases
     );
-    console.log('Created message element with biases');
     
     messageHandler.appendToChatBox(aiMessage);
-    console.log('Appended message to chat box');
 
   } catch (error) {
     console.error('Error processing Azure response:', error);
-    
-    // Remove thinking animation if it exists
     const thinking = document.querySelector('.thinking');
-    if (thinking) {
-      thinking.remove();
-    }
+    if (thinking) thinking.remove();
     
-    // Create error message
     const errorMessage = messageHandler.createMessageElement(
       'ai-message error-message',
       error.message || "Sorry, there was an error processing your request."
@@ -222,5 +218,5 @@ async function handleDetectBias() {
   }
 }
 
-// Initialize when DOM is loaded
+// Call initializeApp when the document is loaded
 document.addEventListener('DOMContentLoaded', initializeApp);

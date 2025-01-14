@@ -10,7 +10,26 @@ const app = express();
 const PORT = 3000;
 
 // Enable CORS and JSON parsing
-app.use(cors());
+const isDev = process.env.NODE_ENV !== 'production';
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5501',
+  'http://127.0.0.1:5501'
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || isDev) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Azure OpenAI API configuration
@@ -81,6 +100,78 @@ Gender, age, racial, cultural, anchoring, confirmation bias, human bias, availab
 Your response should be related to the user input.
 `;
 
+// Update the system prompt for bias analysis
+const biasAnalysisPrompt = `You are a bias detection system. Analyze the following text for potential biases. 
+Potential biases include but not limited to gender, age, racial, cultural, anchoring, confirmation bias, human bias, availability bias, framing bias, loss aversion, Status Quo Bias, Observational Bias (Streetlight Effect), McNamara Fallacy, Groupthink etc.
+
+Important rules for analysis:
+1. Only identify the exact biased phrases, not surrounding context
+2. Ensure suggested alternatives:
+   - Are completely bias-free
+   - Maintain the same grammatical structure and part of speech
+   - Can directly replace the original phrase without changing surrounding text
+   - Preserve tense, number, and other grammatical features
+3. Do not include surrounding words that are grammatically necessary but not biased
+4. Preserve sentence structure in suggestions
+
+For each bias found, provide:
+- The exact biased phrase (minimal, specific words only)
+- Type of bias
+- A bias-free, grammatically compatible replacement
+
+Examples:
+Input: "Why are all students lazy nowadays?"
+Correct analysis: {
+  "biases": [
+    {
+      "phrase": "all students lazy",
+      "type": "Overgeneralization Bias",
+      "suggestion": "some students experiencing low motivation"
+    }
+  ]
+}
+
+Input: "Old people can't understand technology."
+Correct analysis: {
+  "biases": [
+    {
+      "phrase": "Old people can't understand technology",
+      "type": "Age Bias",
+      "suggestion": "Some individuals may need additional support with technology"
+    }
+  ]
+}
+
+Input: "Why do women always struggle with technical tasks?"
+Correct analysis: {
+  "biases": [
+    {
+      "phrase": "women always struggle with technical tasks",
+      "type": "Gender Bias",
+      "suggestion": "different people have varying levels of technical experience"
+    }
+  ]
+}
+
+You must respond with valid JSON in the following format only:
+{
+  "biases": [
+    {
+      "phrase": "exact biased text from input",
+      "type": "type of bias",
+      "suggestion": "bias-free grammatically compatible replacement"
+    }
+  ]
+}
+
+Before suggesting any replacement, verify that it:
+1. Contains no biases of any kind
+2. Maintains grammatical correctness
+3. Fits naturally into the original sentence structure
+4. Preserves the intended communication purpose while removing bias
+
+If no biases are found, respond with: {"biases": []}`
+
 app.post('/api/process', async (req, res) => {
   console.log('\n=== New Message Processing ===');
   console.log('1. User Input:', req.body.input);
@@ -126,23 +217,7 @@ app.post('/api/process', async (req, res) => {
         messages: [
           {
             role: "system",
-            content: `You are a bias detection system. Analyze the following text for potential biases. 
-            Potential biases include but not limited to gender, age, racial, cultural, anchoring, confirmation bias, human bias, availability bias, framing bias, loss aversion, Status Quo Bias, Observational Bias (Streetlight Effect), McNamara Fallacy, Groupthink etc.
-
-            For each bias found, provide the biased phrase, type of bias, and a suggested alternative.
-            
-            You must respond with valid JSON in the following format only:
-            {
-              "biases": [
-                {
-                  "phrase": "exact biased text from input",
-                  "type": "type of bias",
-                  "suggestion": "suggested alternative phrasing"
-                }
-              ]
-            }
-            
-            If no biases are found, respond with: {"biases": []}`
+            content: biasAnalysisPrompt
           },
           { role: "user", content: aiResponse }
         ],

@@ -126,8 +126,8 @@ export class BiasMap {
                     <h3>${d.label}</h3>
                     <p class="bias-phrase">"${d.phrase}"</p>
                     <div class="bias-tooltip-buttons">
-                        <button class="edit-button" onclick="this.closest('.bias-map-tooltip').dataset.editing='true'">Edit</button>
-                        <button class="tips-button">Tips</button>
+                        <button class="edit-button" onclick="event.stopPropagation()">Edit</button>
+                        <button class="tips-button" onclick="event.stopPropagation()">Tips</button>
                     </div>
                     <div class="edit-suggestion">
                         Suggestion: ${d.suggestion}
@@ -136,6 +136,46 @@ export class BiasMap {
             `)
             .style("left", (event.pageX + 10) + "px")
             .style("top", (event.pageY - 10) + "px");
+
+            // Add click handlers directly to the buttons
+            this.tooltipDiv.select(".edit-button")
+                .on("click", () => {
+                    event.stopPropagation();
+                    this.showDialog(
+                        "Edit Suggestion",
+                        `<p>Original: "${d.phrase}"</p>
+                         <p>Suggested: "${d.suggestion}"</p>`,
+                        [
+                            {
+                                text: "Apply Change",
+                                type: "primary",
+                                onClick: () => this.applyEdit(d)
+                            },
+                            {
+                                text: "Cancel",
+                                type: "secondary"
+                            }
+                        ]
+                    );
+                });
+
+            this.tooltipDiv.select(".tips-button")
+                .on("click", () => {
+                    event.stopPropagation();
+                    this.showDialog(
+                        `${d.label} Bias Detected`,
+                        `<p>This phrase shows ${d.label.toLowerCase()} bias:</p>
+                         <p class="bias-phrase">"${d.phrase}"</p>
+                         <p>Suggestion to improve:</p>
+                         <p>${d.suggestion}</p>`,
+                        [
+                            {
+                                text: "Got it",
+                                type: "primary"
+                            }
+                        ]
+                    );
+                });
 
             // Highlight corresponding text
             if (this.messageContent) {
@@ -155,12 +195,44 @@ export class BiasMap {
     nodes.on("click", (event, d) => {
         if (d.type === "bias") {
             event.stopPropagation();
-            if (this.activeNode === d) {
-                this.hideTooltip();
-                this.activeNode = null;
-            } else {
-                this.activeNode = d;
-            }
+            const tooltipContent = this.tooltipDiv.select(".bias-map-tooltip-content");
+            
+            // Handle Edit button click
+            tooltipContent.select(".edit-button").on("click", () => {
+                this.showDialog(
+                    "Edit Suggestion",
+                    `<p>Original: "${d.phrase}"</p>
+                     <p>Suggested: "${d.suggestion}"</p>`,
+                    [
+                        {
+                            text: "Apply Change",
+                            type: "primary",
+                            onClick: () => this.applyEdit(d)
+                        },
+                        {
+                            text: "Cancel",
+                            type: "secondary"
+                        }
+                    ]
+                );
+            });
+
+            // Handle Tips button click
+            tooltipContent.select(".tips-button").on("click", () => {
+                this.showDialog(
+                    `${d.label} Bias Detected`,
+                    `<p>This phrase shows ${d.label.toLowerCase()} bias:</p>
+                     <p class="bias-phrase">"${d.phrase}"</p>
+                     <p>Suggestion to improve:</p>
+                     <p>${d.suggestion}</p>`,
+                    [
+                        {
+                            text: "Got it",
+                            type: "primary"
+                        }
+                    ]
+                );
+            });
         }
     });
 
@@ -225,5 +297,59 @@ export class BiasMap {
 
   setMessageContent(element) {
     this.messageContent = element;
+  }
+
+  showDialog(title, content, buttons) {
+    // Remove any existing dialog
+    this.hideDialog();
+
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'bias-dialog-overlay';
+    document.body.appendChild(overlay);
+
+    // Create dialog
+    const dialog = document.createElement('div');
+    dialog.className = 'bias-dialog';
+    dialog.innerHTML = `
+        <div class="bias-dialog-header">${title}</div>
+        <div class="bias-dialog-content">${content}</div>
+        <div class="bias-dialog-buttons"></div>
+    `;
+
+    // Add buttons
+    const buttonContainer = dialog.querySelector('.bias-dialog-buttons');
+    buttons.forEach(button => {
+        const btn = document.createElement('button');
+        btn.className = `bias-dialog-button ${button.type || 'secondary'}`;
+        btn.textContent = button.text;
+        btn.onclick = () => {
+            this.hideDialog();
+            button.onClick?.();
+        };
+        buttonContainer.appendChild(btn);
+    });
+
+    document.body.appendChild(dialog);
+  }
+
+  hideDialog() {
+    const overlay = document.querySelector('.bias-dialog-overlay');
+    const dialog = document.querySelector('.bias-dialog');
+    if (overlay) overlay.remove();
+    if (dialog) dialog.remove();
+  }
+
+  applyEdit(node) {
+    if (this.messageContent) {
+        const highlightElements = this.messageContent.querySelectorAll('.bias-highlight');
+        highlightElements.forEach(el => {
+            if (el.textContent === node.phrase) {
+                el.textContent = node.suggestion;
+                el.classList.remove('active');
+            }
+        });
+    }
+    this.hideTooltip();
   }
 } 
