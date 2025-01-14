@@ -3,3 +3,29 @@
 
 # Node modules
 node_modules/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env.development
+.env.production
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
