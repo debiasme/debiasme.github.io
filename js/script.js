@@ -10,7 +10,7 @@ let useAzure = false; // Initialize useAzure flag
 async function initializeApp() {
   try {
     // Load scenarios
-    const response = await fetch("/scenarios.json");
+    const response = await fetch("../scenarios.json");
     if (!response.ok) {
       throw new Error(`Failed to load scenarios: ${response.statusText}`);
     }
