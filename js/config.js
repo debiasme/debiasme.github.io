@@ -4,8 +4,8 @@ const config = {
     allowedOrigins: ['http://localhost:3000', 'http://localhost:5501', 'http://127.0.0.1:5501']
   },
   production: {
-    apiUrl: 'https://your-app-name.onrender.com',
-    allowedOrigins: ['https://cmlmanni.github.io']
+    apiUrl: 'https://ayeeye.onrender.com',
+    allowedOrigins: ['https://cmlmanni.github.io/AyeEye']
   }
 };
 
