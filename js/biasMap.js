@@ -82,7 +82,7 @@ export class BiasMap {
       .join("line")
       .attr("class", "bias-map-link");
 
-    // Update nodes
+    // Update nodes with p5.js style
     const nodes = this.svg.selectAll(".node")
       .data(this.nodes)
       .join("g")
@@ -97,13 +97,25 @@ export class BiasMap {
 
     // Add circles to nodes
     nodes.append("circle")
-      .attr("class", d => `bias-map-circle ${d.type}`);
+      .attr("class", d => `bias-map-circle ${d.type}`)
+      .attr("r", d => d.type === "center" ? 12 : 10)
+      .style("fill", d => d.type === "center" ? "#6366f1" : "#ef4444");
 
     // Add labels to nodes
     nodes.append("text")
       .text(d => d.label)
       .attr("class", "bias-map-label")
       .attr("dy", ".35em");
+
+    // Add glow effect
+    nodes.append("circle")
+      .attr("class", "glow")
+      .attr("r", d => d.type === "center" ? 14 : 12)
+      .style("fill", "none")
+      .style("stroke", d => d.type === "center" ? "#6366f1" : "#ef4444")
+      .style("stroke-width", "2px")
+      .style("stroke-opacity", "0.3")
+      .style("filter", "blur(4px)");
 
     // Add hover interactions
     nodes.on("mouseover", (event, d) => {
