@@ -26,8 +26,28 @@ class BiasChecker {
     
     If no biases are found, respond with: {"biases": []}
     
-    Your response must contains phrases with some of these biases `; //TODO: Check this line
-  } 
+    Your response must contains phrases with some of these biases`;
+
+    // Add touch event handling
+    this.setupTouchEvents();
+  }
+
+  setupTouchEvents() {
+    const detectButton = document.getElementById("detect-bias-button");
+    if (detectButton) {
+      // Handle both touch and click events
+      detectButton.addEventListener('touchstart', async (e) => {
+        e.preventDefault(); // Prevent double-firing on mobile
+        const input = document.getElementById("user-input");
+        if (!input || !input.value.trim()) return;
+
+        const result = await this.handleBiasCheck(input.value, input);
+        if (result) {
+          input.parentNode.replaceChild(result, input);
+        }
+      });
+    }
+  }
 
   /**
    * Toggle bias checker state
@@ -47,6 +67,7 @@ class BiasChecker {
 
   async analyzeText(text) {
     try {
+      console.log('Analyzing text:', text); // Add logging
       const response = await fetch("http://localhost:3000/api/analyze-bias", {
         method: "POST",
         headers: {
@@ -64,6 +85,7 @@ class BiasChecker {
       }
 
       const analysis = await response.json();
+      console.log('Analysis response:', analysis); // Add logging
       return analysis;
     } catch (error) {
       console.error("Error analyzing bias:", error);
@@ -80,12 +102,20 @@ class BiasChecker {
       return document.createTextNode(text);
     }
 
-    const analysis = await this.analyzeText(text);
-    if (!analysis || !analysis.biases || analysis.biases.length === 0) {
+    try {
+      const analysis = await this.analyzeText(text);
+      console.log('Bias analysis result:', analysis); // Add logging
+
+      if (!analysis || !analysis.biases || analysis.biases.length === 0) {
+        console.log('No biases detected'); // Add logging
+        return document.createTextNode(text);
+      }
+
+      return this.visualizer.highlightBiases(text, analysis.biases, inputElement);
+    } catch (error) {
+      console.error('Error in handleBiasCheck:', error);
       return document.createTextNode(text);
     }
-
-    return this.visualizer.highlightBiases(text, analysis.biases, inputElement);
   }
 
   /**

@@ -888,3 +888,178 @@ body {
     backdrop-filter: blur(4px);
     z-index: 1000;
 }
+
+/* Add these mobile-specific styles at the end of your CSS file */
+
+@media screen and (max-width: 768px) {
+    /* Message and Map Layout */
+    .message-row {
+        flex-direction: column;
+        margin: 15px 0;
+        padding: 0 10px;
+    }
+
+    .ai-message {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .user-message {
+        max-width: 85%;
+        align-self: flex-end;
+    }
+
+    /* Bias Map Container - Make it visible and usable on mobile */
+    .bias-map-container {
+        position: relative;
+        left: 0;
+        width: 100%;
+        height: 250px;
+        margin-top: 15px;
+        background-color: rgba(26, 26, 26, 0.5);
+        border-radius: 12px;
+        padding: 10px;
+    }
+
+    .bias-map {
+        width: 100%;
+        height: 100%;
+        touch-action: manipulation; /* Improve touch handling */
+    }
+
+    /* Improve node interaction on mobile */
+    .bias-map-circle {
+        r: 15; /* Larger touch targets */
+    }
+
+    .bias-map-label {
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Chat Box Adjustments */
+    #chat-box {
+        padding: 10px 0;
+        height: calc(100vh - 180px);
+        margin-bottom: 160px; /* Space for fixed input section */
+    }
+
+    /* Fixed Input Section at Bottom */
+    #input-section {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #1f2937;
+        padding: 15px;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+
+    /* Compact Input Controls */
+    .button-container {
+        margin-bottom: 8px;
+    }
+
+    #toggle-bias-checker {
+        width: 100%;
+        margin-bottom: 8px;
+        padding: 10px;
+    }
+
+    #user-select {
+        width: 100%;
+        margin-bottom: 8px;
+        padding: 10px;
+        background-color: #374151;
+        border: 1px solid #4b5563;
+        color: white;
+        border-radius: 6px;
+    }
+
+    .input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #user-input {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        background-color: #374151;
+        border: 1px solid #4b5563;
+        border-radius: 6px;
+        color: white;
+    }
+
+    .input-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .input-buttons button {
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* Improved Tooltip for Mobile */
+    .bias-map-tooltip {
+        position: fixed;
+        left: 50% !important;
+        bottom: 200px; /* Above the input section */
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 300px;
+        z-index: 2000;
+        background-color: #1f2937;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    /* Improved Dialog for Mobile */
+    .bias-dialog {
+        width: 90%;
+        max-height: 70vh;
+        padding: 20px;
+        margin: 15% auto;
+    }
+
+    .bias-dialog-content {
+        max-height: 50vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .bias-dialog-buttons {
+        padding-top: 15px;
+    }
+}
+
+/* Additional adjustments for very small screens */
+@media screen and (max-width: 380px) {
+    .bias-map-label {
+        font-size: 11px;
+    }
+
+    .input-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Prevent pull-to-refresh on mobile */
+@media screen and (max-width: 768px) {
+    html, body {
+        overscroll-behavior-y: contain;
+    }
+}
+
+/* Safe area insets for modern mobile browsers */
+@supports (padding: max(0px)) {
+    #input-section {
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+    }
+}
