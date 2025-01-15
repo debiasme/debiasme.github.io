@@ -29,7 +29,7 @@ export const prompts = {
     For each bias found, you must provide:
     1. The exact biased phrase from the input
     2. The type in format "Bias: [type]" (e.g., "Bias: Gender", "Bias: Confirmation")
-    3. A clear, actionable suggestion for alternative phrasing
+    3. A clear, actionable suggestion for alternative phrasing that is bias free
     
     Respond with valid JSON in this format only:
     {
