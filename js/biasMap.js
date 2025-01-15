@@ -167,7 +167,7 @@ export class BiasMap {
                             <p><strong>Identified phrase:</strong></p>
                             <p class="bias-phrase">"${d.phrase}"</p>
                             
-                            <p><strong>What is ${d.label}?</strong></p>
+                            <p><strong>What is this bias?</strong></p>
                             ${explanation.what}
                             
                             <p><strong>Why is it problematic?</strong></p>
