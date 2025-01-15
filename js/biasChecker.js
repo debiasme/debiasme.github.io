@@ -28,28 +28,7 @@ class BiasChecker {
     
     Your response must contains phrases with some of these biases`;
 
-    // Add touch event handling
-    this.setupTouchEvents();
-  }
-
-  setupTouchEvents() {
-    const detectButton = document.getElementById("detect-bias-button");
-    if (detectButton) {
-        // Remove any existing listeners
-        const newButton = detectButton.cloneNode(true);
-        detectButton.parentNode.replaceChild(newButton, detectButton);
-        
-        // Add both touch and click handlers
-        newButton.addEventListener('touchend', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            await this.handleDetectBias();
-        }, { passive: false });
-
-        newButton.addEventListener('click', async (e) => {
-            await this.handleDetectBias();
-        });
-    }
+    // Remove mobile-specific touch events
   }
 
   async handleDetectBias() {
