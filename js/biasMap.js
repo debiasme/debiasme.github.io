@@ -16,11 +16,11 @@ export class BiasMap {
         .attr("class", "bias-map")
         .attr("viewBox", [-20, -20, 540, 340]);
 
-    // Create tooltip
+    // Create tooltip with pointer events enabled
     this.tooltipDiv = d3.select("body").append("div")
         .attr("class", "bias-map-tooltip")
         .style("opacity", 0)
-        .style("pointer-events", "none");
+        .style("pointer-events", "auto");  // Enable interaction with tooltip
 
     this.container.appendChild(this.svg.node());
 
@@ -127,7 +127,7 @@ export class BiasMap {
       .style("stroke-opacity", "0.3")
       .style("filter", "blur(4px)");
 
-    // Add hover interactions
+    // Update hover interactions
     nodes.on("mouseover", (event, d) => {
         if (d.type === "bias") {
             // Remove previous highlights
@@ -137,56 +137,31 @@ export class BiasMap {
                 });
             }
 
-            // Show tooltip
-            this.tooltipDiv
-                .transition()
-                .duration(200)
-                .style("opacity", 1);
+            // Position and show tooltip
+            const tooltipX = event.pageX + 10;
+            const tooltipY = event.pageY - 10;
             
-            this.tooltipDiv.html(`
-                <div class="bias-map-tooltip-content">
-                    <h3>${d.label}</h3>
-                    <p class="bias-phrase">"${d.phrase}"</p>
-                    <div class="bias-tooltip-buttons">
-                        <button class="edit-button" onclick="event.stopPropagation()">Edit</button>
-                        <button class="tips-button" onclick="event.stopPropagation()">Tips</button>
+            this.tooltipDiv
+                .style("left", tooltipX + "px")
+                .style("top", tooltipY + "px")
+                .style("opacity", 1)
+                .html(`
+                    <div class="bias-map-tooltip-content">
+                        <h3>${d.label}</h3>
+                        <p class="bias-phrase">"${d.phrase}"</p>
+                        <div class="bias-tooltip-buttons">
+                            <button class="tips-button" onclick="event.stopPropagation()">Tips</button>
+                        </div>
                     </div>
-                    <div class="edit-suggestion">
-                        Suggestion: ${d.suggestion}
-                    </div>
-                </div>
-            `)
-            .style("left", (event.pageX + 10) + "px")
-            .style("top", (event.pageY - 10) + "px");
+                `);
 
-            // Add click handlers directly to the buttons
-            this.tooltipDiv.select(".edit-button")
-                .on("click", () => {
-                    event.stopPropagation();
-                    this.showDialog(
-                        "Edit Suggestion",
-                        `<p>Original: "${d.phrase}"</p>
-                         <p>Suggested: "${d.suggestion}"</p>`,
-                        [
-                            {
-                                text: "Apply Change",
-                                type: "primary",
-                                onClick: () => this.applyEdit(d)
-                            },
-                            {
-                                text: "Cancel",
-                                type: "secondary"
-                            }
-                        ]
-                    );
-                });
-
+            // Add click handler for Tips button
             this.tooltipDiv.select(".tips-button")
                 .on("click", () => {
                     event.stopPropagation();
                     this.showDialog(
-                        `${d.label} Bias Detected`,
-                        `<p>This phrase shows ${d.label.toLowerCase()} bias:</p>
+                        `${d.label} Detected`,
+                        `<p>This phrase shows ${d.label.toLowerCase()}:</p>
                          <p class="bias-phrase">"${d.phrase}"</p>
                          <p>Suggestion to improve:</p>
                          <p>${d.suggestion}</p>`,
@@ -212,6 +187,9 @@ export class BiasMap {
             this.activeNode = d;
         }
     });
+
+    // Remove mouseout handler to keep tooltip visible
+    nodes.on("mouseout", null);
 
     // Handle clicks for persistent tooltips
     nodes.on("click", (event, d) => {
