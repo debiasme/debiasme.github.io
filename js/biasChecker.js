@@ -9,24 +9,51 @@ class BiasChecker {
   constructor() {
     this.visualizer = new BiasVisualizer();
     this.systemPrompt = `You are a bias detection system. Analyze the following text for potential biases. 
-    Potential biases include but not limited to gender, age, racial, cultural, anchoring, confirmation bias, human bias, availability bias, framing bias, loss aversion, Status Quo Bias, Observational Bias (Streetlight Effect), McNamara Fallacy, Groupthink etc.
+    You must thoroughly check for these specific categories of bias:
 
-    For each bias found, provide the biased phrase, type of bias, and a suggested alternative.
+    1. Cognitive Biases:
+    - Confirmation Bias (interpreting information to confirm existing beliefs)
+    - Anchoring Bias (over-relying on first piece of information)
+    - Availability Bias (overestimating likelihood based on memorable examples)
+    - Status Quo Bias (preference for current state of affairs)
     
-    You must respond with valid JSON in the following format only:
+    2. Social Biases:
+    - Gender Bias (stereotyping or discrimination based on gender)
+    - Age Bias (prejudice against age groups)
+    - Racial/Ethnic Bias (prejudice based on race or ethnicity)
+    - Cultural Bias (favoring one culture's viewpoints over others)
+    
+    3. Professional Biases:
+    - Authority Bias (giving excessive weight to authority figures)
+    - In-group Bias (favoring members of one's own group)
+    - Experience Bias (over-relying on personal experience)
+    - Selection Bias (using non-representative data or examples)
+
+    4. Language Biases:
+    - Framing Bias (how information presentation influences decisions)
+    - Loaded Language (words carrying strong positive/negative implications)
+    - Generalization (making broad statements about groups)
+    - Exclusionary Language (terms that exclude certain groups)
+
+    For each bias found, you must provide:
+    1. The exact biased phrase from the input
+    2. The specific type of bias from the categories above
+    3. A clear, actionable suggestion for alternative phrasing
+    
+    Respond with valid JSON in this format only:
     {
       "biases": [
         {
           "phrase": "exact biased text from input",
-          "type": "type of bias",
-          "suggestion": "suggested alternative phrasing"
+          "type": "specific type of bias from the categories above",
+          "suggestion": "suggested alternative phrasing that eliminates the bias"
         }
       ]
     }
     
     If no biases are found, respond with: {"biases": []}
     
-    Your response must contains phrases with some of these biases`;
+    Important: You must be thorough and identify subtle biases. Even seemingly neutral language should be analyzed for underlying assumptions and biases.`;
 
     // Remove mobile-specific touch events
   }
