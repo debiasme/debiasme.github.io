@@ -91,10 +91,11 @@ function createThinkingAnimation(type = 'bias') {
         text.textContent = 'Analyzing text for potential biases...';
     } else {
         // For map generation, we'll update the text periodically
-        text.textContent = 'Analyzing response and generating visualization...';
+        text.textContent = 'Analyzing response...';
         let stage = 0;
         const stages = [
-            'Analyzing response and generating visualization...',
+            'Analyzing response...',
+            'Generating visualization...',
             'Creating bias connections...',
             'Building interactive visualization map...',
             'Almost there...'
