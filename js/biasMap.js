@@ -150,27 +150,34 @@ export class BiasMap {
                         <h3>${d.label}</h3>
                         <p class="bias-phrase">"${d.phrase}"</p>
                         <div class="bias-tooltip-buttons">
-                            <button class="tips-button" onclick="event.stopPropagation()">Tips</button>
+                            <button class="tips-button" onclick="event.stopPropagation()">Explore More</button>
                         </div>
                     </div>
                 `);
 
-            // Add click handler for Tips button
+            // Update click handler with detailed explanations
             this.tooltipDiv.select(".tips-button")
                 .on("click", () => {
                     event.stopPropagation();
+                    const explanation = this.getBiasExplanation(d.label);
                     this.showDialog(
-                        `${d.label} Detected`,
-                        `<p>This phrase shows ${d.label.toLowerCase()}:</p>
-                         <p class="bias-phrase">"${d.phrase}"</p>
-                         <p>Suggestion to improve:</p>
-                         <p>${d.suggestion}</p>`,
-                        [
-                            {
-                                text: "Got it",
-                                type: "primary"
-                            }
-                        ]
+                        `Understanding ${d.label}`,
+                        `
+                        <div class="bias-explanation">
+                            <p><strong>Identified phrase:</strong></p>
+                            <p class="bias-phrase">"${d.phrase}"</p>
+                            
+                            <p><strong>What is ${d.label}?</strong></p>
+                            ${explanation.what}
+                            
+                            <p><strong>Why is it problematic?</strong></p>
+                            ${explanation.why}
+                            
+                            <p><strong>How to improve:</strong></p>
+                            <p>${d.suggestion}</p>
+                        </div>
+                        `,
+                        [{ text: "Got it", type: "primary" }]
                     );
                 });
 
@@ -351,5 +358,95 @@ export class BiasMap {
         });
     }
     this.hideTooltip();
+  }
+
+  // Add method to get detailed bias explanations
+  getBiasExplanation(biasType) {
+    const explanations = {
+        'Bias: Gender': {
+            what: `
+                <p>Gender bias occurs when assumptions, prejudices, or stereotypes are applied 
+                based on gender. This includes generalizing capabilities, traits, or roles 
+                based on someone's gender identity.</p>
+            `,
+            why: `
+                <p>This type of bias can:</p>
+                <ul>
+                    <li>Perpetuate harmful stereotypes</li>
+                    <li>Limit opportunities based on gender</li>
+                    <li>Create unfair expectations and standards</li>
+                    <li>Ignore individual capabilities and qualities</li>
+                </ul>
+            `
+        },
+        'Bias: Age': {
+            what: `
+                <p>Age bias involves making assumptions about people's abilities, behaviors, 
+                or characteristics based solely on their age. This can affect both younger 
+                and older individuals.</p>
+            `,
+            why: `
+                <p>This type of bias can:</p>
+                <ul>
+                    <li>Lead to discrimination in various settings</li>
+                    <li>Overlook valuable experience or fresh perspectives</li>
+                    <li>Create artificial barriers to participation</li>
+                    <li>Disregard individual capabilities and potential</li>
+                </ul>
+            `
+        },
+        'Bias: Generalization': {
+            what: `
+                <p>Generalization bias occurs when broad, sweeping statements are made about 
+                entire groups of people, situations, or phenomena without accounting for 
+                individual differences or specific contexts.</p>
+            `,
+            why: `
+                <p>This type of bias can:</p>
+                <ul>
+                    <li>Oversimplify complex realities</li>
+                    <li>Lead to stereotyping and prejudice</li>
+                    <li>Ignore important individual differences</li>
+                    <li>Result in unfair treatment or judgment</li>
+                </ul>
+            `
+        },
+        'Bias: Cultural': {
+            what: `
+                <p>Cultural bias involves judging other cultures based on the standards 
+                and values of one's own culture, or making assumptions about other cultures 
+                based on limited understanding.</p>
+            `,
+            why: `
+                <p>This type of bias can:</p>
+                <ul>
+                    <li>Lead to misunderstandings and conflicts</li>
+                    <li>Promote ethnocentric viewpoints</li>
+                    <li>Disregard cultural diversity and values</li>
+                    <li>Create barriers to inclusive communication</li>
+                </ul>
+            `
+        }
+        // Add more bias types as needed
+    };
+
+    // Extract the bias type from the format "Bias: Type"
+    const type = biasType.split(': ')[1];
+    
+    return explanations[biasType] || {
+        what: `
+            <p>This type of bias involves making assumptions or judgments that may 
+            unfairly influence perceptions or decisions based on ${type.toLowerCase()}.</p>
+        `,
+        why: `
+            <p>This can be problematic because it:</p>
+            <ul>
+                <li>May lead to unfair treatment or judgment</li>
+                <li>Can perpetuate stereotypes and prejudices</li>
+                <li>Often overlooks individual circumstances</li>
+                <li>May result in missed opportunities or misunderstandings</li>
+            </ul>
+        `
+    };
   }
 } 
