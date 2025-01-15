@@ -1,5 +1,6 @@
 import { stateManager } from './stateManager.js';
 import { BiasMap } from './biasMap.js';
+import { BiasChecker } from './biasChecker.js';
 
 /**
  * Message handling utilities
@@ -100,5 +101,8 @@ class MessageHandler {
     }
   }
 }
+
+// Use the same system prompt for chat messages
+const systemPrompt = BiasChecker.systemPrompt;
 
 export const messageHandler = new MessageHandler(); 

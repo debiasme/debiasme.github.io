@@ -8,7 +8,8 @@ import { BiasVisualizer } from "./biasVisualizer.js";
 class BiasChecker {
   constructor() {
     this.visualizer = new BiasVisualizer();
-    this.systemPrompt = `You are a bias detection system. Analyze the following text for potential biases. 
+    // Make the system prompt static so it can be accessed from anywhere
+    BiasChecker.systemPrompt = `You are a bias detection system. Analyze the following text for potential biases. 
     You must thoroughly check for these specific categories of bias:
 
     1. Cognitive Biases:
@@ -54,6 +55,9 @@ class BiasChecker {
     If no biases are found, respond with: {"biases": []}
     
     Important: You must be thorough and identify subtle biases. Even seemingly neutral language should be analyzed for underlying assumptions and biases.`;
+
+    // Use the static property for instance access
+    this.systemPrompt = BiasChecker.systemPrompt;
 
     // Remove mobile-specific touch events
   }
@@ -234,4 +238,6 @@ class BiasChecker {
   }
 }
 
+// Export both the instance and the class
 export const biasChecker = new BiasChecker();
+export { BiasChecker };
