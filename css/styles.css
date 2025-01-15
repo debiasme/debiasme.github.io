@@ -906,3 +906,46 @@ body {
         overscroll-behavior-y: contain;
     }
 }
+
+/* Loading States */
+.thinking {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    font-size: 14px;
+    background: rgba(99, 102, 241, 0.1); /* Light indigo background */
+    border-radius: 4px;
+    margin: 4px 0;
+}
+
+.thinking-text {
+    margin-right: 4px;
+    color: whitesmoke;
+    font-weight: 500; /* Medium weight for better visibility */
+}
+
+.thinking .dot {
+    width: 6px;
+    height: 6px;
+    background: #6366f1;
+    border-radius: 50%;
+    animation: bounce 1.5s infinite;
+}
+
+.thinking .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-4px);
+    }
+}

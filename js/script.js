@@ -79,16 +79,27 @@ function populateSelectDropdown(scenarios) {
   });
 }
 
-// Add this function to create thinking animation
-function createThinkingAnimation() {
-  const thinking = document.createElement('div');
-  thinking.className = 'thinking';
-  for (let i = 0; i < 3; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'dot';
-    thinking.appendChild(dot);
-  }
-  return thinking;
+// Create thinking animation with specific text
+function createThinkingAnimation(type = 'bias') {
+    const thinking = document.createElement('div');
+    thinking.className = 'thinking';
+    
+    // Add appropriate text based on type
+    const text = document.createElement('span');
+    text.className = 'thinking-text';
+    text.textContent = type === 'bias' 
+        ? 'Analyzing text for bias'
+        : 'Generating visualization map';
+    thinking.appendChild(text);
+    
+    // Add dots
+    for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        thinking.appendChild(dot);
+    }
+    
+    return thinking;
 }
 
 async function handleSendMessage() {
@@ -196,7 +207,7 @@ async function handleDetectBias() {
 
     // Show thinking animation
     const inputWrapper = userInput.closest('.input-wrapper');
-    const thinking = createThinkingAnimation();
+    const thinking = createThinkingAnimation('bias');
     inputWrapper.insertBefore(thinking, userInput);
 
     const analyzedContent = await biasChecker.handleBiasCheck(message, userInput);
