@@ -20,14 +20,14 @@ export class UserGuide {
             },
             {
                 target: '.highlight-container',
-                content: 'Hover over any highlighted phrase to see the tooltip. Then click "Tips" to learn about the bias type, or "Edit" to see suggested improvements',
+                content: 'Hover over any highlighted phrase to see the tooltip. First click "Tip" to learn about the bias type, then click "Edit" to see and apply suggested improvements.',
                 position: 'bottom',
                 action: 'hover-and-click',
                 skipable: true
             },
             {
                 target: '#send-button',
-                content: 'Click Send to get your response with bias analysis. You may also just click "Send" to get a bias visualisation map of the response without detecting bias in prompt.',
+                content: 'Click "Confirm Edit" if you wish to confirm editing the prompt, otherwise click the Cross on the right to further edit the prompt. In any case, click "Send" to get your response with bias analysis. You may also just click "Send" to get a bias visualisation map of the response without detecting bias in prompt.',
                 position: 'top',
                 action: 'click',
                 skipable: true
@@ -231,7 +231,6 @@ export class UserGuide {
                 break;
 
             case 'hover-and-click':
-                // Create observer to watch for tooltip
                 const observer = new MutationObserver((mutations, obs) => {
                     const biasTooltip = document.querySelector('.bias-tooltip');
                     if (biasTooltip) {
@@ -241,11 +240,18 @@ export class UserGuide {
                         const tipsButton = document.querySelector('.tips-button');
                         const editButton = document.querySelector('.edit-button');
                         
+                        // Progress on either button click
                         const handleButtonClick = () => {
                             observer.disconnect();
+                            
+                            // Remove any existing event listeners
+                            if (tipsButton) tipsButton.removeEventListener('click', handleButtonClick);
+                            if (editButton) editButton.removeEventListener('click', handleButtonClick);
+                            
                             this.handleStepComplete(tooltip);
                         };
                         
+                        // Add listeners to both buttons
                         if (tipsButton) {
                             tipsButton.addEventListener('click', handleButtonClick, { once: true });
                         }
@@ -255,7 +261,6 @@ export class UserGuide {
                     }
                 });
 
-                // Start observing when user hovers over highlight
                 target.addEventListener('mouseover', () => {
                     observer.observe(document.body, { 
                         childList: true, 
