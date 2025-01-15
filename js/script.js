@@ -5,6 +5,7 @@ import { environment } from './environment.js';
 
 // Global variable to track Azure API usage
 let useAzure = false; // Initialize useAzure flag
+let biasCheckerEnabled = true;
 
 // Initialize the application
 async function initializeApp() {
@@ -44,7 +45,23 @@ function setupEventListeners() {
 
   // Toggle button for bias checker
   document.getElementById("toggle-bias-checker").addEventListener("click", () => {
-    biasChecker.toggleBiasChecker();
+    biasCheckerEnabled = !biasCheckerEnabled;
+    const toggleButton = document.getElementById("toggle-bias-checker");
+    const detectBiasButton = document.getElementById("detect-bias-button");
+    
+    if (biasCheckerEnabled) {
+        toggleButton.textContent = 'Disable Bias Checker';
+        toggleButton.classList.add('bias-checker-enabled');
+        toggleButton.classList.remove('bias-checker-disabled');
+        detectBiasButton.disabled = false;
+        detectBiasButton.style.opacity = '1';
+    } else {
+        toggleButton.textContent = 'Enable Bias Checker';
+        toggleButton.classList.remove('bias-checker-enabled');
+        toggleButton.classList.add('bias-checker-disabled');
+        detectBiasButton.disabled = true;
+        detectBiasButton.style.opacity = '0.7';
+    }
   });
 
   // Detect bias button
@@ -117,7 +134,10 @@ async function handleAzureResponse(userMessage) {
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      body: JSON.stringify({ input: userMessage }),
+      body: JSON.stringify({ 
+        input: userMessage,
+        biasCheckerEnabled: biasCheckerEnabled
+      }),
     });
 
     const data = await response.json();
@@ -221,4 +241,6 @@ async function handleDetectBias() {
 }
 
 // Call initializeApp when the document is loaded
-document.addEventListener('DOMContentLoaded', initializeApp);
+document.addEventListener('DOMContentLoaded', () => {
+  initializeApp();
+});

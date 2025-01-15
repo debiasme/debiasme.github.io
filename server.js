@@ -44,32 +44,36 @@ const AZURE_API_KEY = process.env.AZURE_OPENAI_API_KEY;
 const AZURE_DEPLOYMENT = process.env.AZURE_DEPLOYMENT_NAME;
 const API_VERSION = '2024-08-01-preview'; // DO NOT MODIFY THIS LINE
 
-// Configure axios with longer timeout and retry logic
+// Configure axios with optimized settings for direct messages
 const axiosInstance = axios.create({
-  timeout: 60000, // Increase to 60 seconds
-  maxRetries: 3,
-  retryDelay: 1000,
+  timeout: 30000, // Reduce to 30 seconds for direct messages
+  maxRetries: 2,  // Reduce retries for direct messages
+  retryDelay: 500, // Faster retry
+  headers: {
+    'Content-Type': 'application/json',
+    'api-key': AZURE_API_KEY
+  }
 });
 
-// Add retry interceptor
+// Optimize retry logic
 axiosInstance.interceptors.response.use(undefined, async (err) => {
   const { config } = err;
   if (!config || !config.retry) {
     return Promise.reject(err);
   }
 
+  // Only retry on network errors or 5xx responses
+  if (!err.isAxiosError || (err.response && err.response.status < 500)) {
+    return Promise.reject(err);
+  }
+
   config.currentRetryAttempt = config.currentRetryAttempt || 0;
-  
   if (config.currentRetryAttempt >= config.retry) {
     return Promise.reject(err);
   }
 
   config.currentRetryAttempt += 1;
-  const delayRetryRequest = new Promise(resolve => {
-    setTimeout(resolve, config.retryDelay || 1000);
-  });
-
-  await delayRetryRequest;
+  await new Promise(resolve => setTimeout(resolve, config.retryDelay || 500));
   return axiosInstance(config);
 });
 
@@ -117,16 +121,53 @@ function cleanBiasType(type) {
 app.post('/api/process', async (req, res) => {
   console.log('\n=== New Message Processing ===');
   console.log('1. User Input:', req.body.input);
-  console.log('2. System Prompt:', systemPrompt);
-
+  console.log('2. Bias Checker Enabled:', req.body.biasCheckerEnabled);
+  
   try {
+    const userInput = req.body.input;
+    const biasCheckerEnabled = req.body.biasCheckerEnabled;
+
+    // If bias checker is disabled, send direct response without system prompt
+    if (!biasCheckerEnabled) {
+      console.log('Bias checker disabled - sending direct response');
+      // Remove unnecessary DNS check and simplify the request
+      const response = await axiosInstance.post(
+        `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT}/chat/completions`,
+        {
+          messages: [{ role: "user", content: userInput }],
+          max_tokens: 800,
+          temperature: 0.7,
+          // Add stream: false to ensure faster non-streaming response
+          stream: false
+        },
+        {
+          params: { 'api-version': API_VERSION },
+          headers: {
+            'api-key': AZURE_API_KEY,
+            'Content-Type': 'application/json',
+          },
+          // Reduce timeout for direct messages
+          timeout: 30000
+        }
+      );
+
+      return res.json({
+        success: true,
+        response: response.data.choices[0].message.content,
+        biases: []
+      });
+    }
+
+    // If enabled, continue with existing bias checking logic
+    console.log('3. System Prompt:', systemPrompt);
+
     const hostname = getHostname(AZURE_ENDPOINT);
     if (hostname) {
       await checkDNSConnection(hostname);
     }
 
     // First get AI response
-    console.log('3. Getting AI response...');
+    console.log('4. Getting AI response...');
     const response = await axiosInstance.post(
       `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT}/chat/completions`,
       {
@@ -149,10 +190,10 @@ app.post('/api/process', async (req, res) => {
     );
 
     const aiResponse = response.data.choices[0].message.content;
-    console.log('4. AI Response received:', aiResponse);
+    console.log('5. AI Response received:', aiResponse);
 
     // Then analyze the response for biases
-    console.log('5. Analyzing response for biases...');
+    console.log('6. Analyzing response for biases...');
     const biasAnalysisResponse = await axiosInstance.post(
       `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT}/chat/completions`,
       {
@@ -178,20 +219,20 @@ app.post('/api/process', async (req, res) => {
     let biases = [];
     try {
       const biasContent = biasAnalysisResponse.data.choices[0].message.content;
-      console.log('6. Raw bias analysis:', biasContent);
+      console.log('7. Raw bias analysis:', biasContent);
       const biasAnalysis = JSON.parse(biasContent);
       // Clean up bias types
       biases = biasAnalysis.biases.map(bias => ({
           ...bias,
           type: cleanBiasType(bias.type)
       }));
-      console.log('7. Parsed biases:', biases);
+      console.log('8. Parsed biases:', biases);
     } catch (parseError) {
       console.error('Error parsing bias analysis:', parseError);
     }
 
     // Send both the response and biases
-    console.log('8. Sending response with', biases.length, 'biases');
+    console.log('9. Sending response with', biases.length, 'biases');
     return res.json({
       success: true,
       response: aiResponse,
