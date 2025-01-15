@@ -31,18 +31,23 @@ class MessageHandler {
       element.appendChild(messageContent);
 
       if (biases && biases.length > 0) {
+        const cleanedBiases = biases.map(bias => ({
+          ...bias,
+          type: this.cleanBiasType(bias.type)
+        }));
+
         const mapContainer = document.createElement("div");
         mapContainer.className = "bias-map-container";
         element.appendChild(mapContainer);
 
         const biasMap = new BiasMap(mapContainer);
-        biasMap.updateMap(biases);
+        biasMap.updateMap(cleanedBiases);
         
         // Connect the message content with the bias map
         biasMap.setMessageContent(messageContent);
 
-        // Add all bias phrases as highlights (initially inactive)
-        biases.forEach(bias => {
+        // Add all bias phrases as highlights
+        cleanedBiases.forEach(bias => {
           const phrase = bias.phrase;
           const regex = new RegExp(phrase, 'g');
           messageContent.innerHTML = messageContent.innerHTML.replace(
@@ -100,9 +105,17 @@ class MessageHandler {
       stateManager.setState('error', 'Failed to send message');
     }
   }
+
+  cleanBiasType(type) {
+    return type
+      .replace(/\s*Bias\s*Bias$/i, ' Bias')
+      .replace(/^Bias\s*Bias\s*/i, 'Bias ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
 }
 
-// Use the same system prompt for chat messages
+// This import isn't being used in the actual API calls
 const systemPrompt = BiasChecker.systemPrompt;
 
 export const messageHandler = new MessageHandler(); 

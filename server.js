@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import dns from 'dns';
+import { prompts } from './js/prompts.js';
 
 dotenv.config();
 
@@ -97,61 +98,21 @@ function getHostname(url) {
   }
 }
 
-// Add this after the API configuration constants
-const systemPrompt = `You are an AI assistant that helps experimenting biases. Please imitate you are an entity that would utter speech with phrases that can be evaluated as biased speech. The tone should still be yours as chatGPT.
-As an experiment, your response must include some phrases or wordings that can be evaluated as some of the following biases for further evaluation in such biases.
-Gender, age, racial, cultural, anchoring, confirmation bias, human bias, availability bias, framing bias, loss aversion, Status Quo Bias, Observational Bias (Streetlight Effect), McNamara Fallacy, Groupthink etc.
+// Update the chat generation prompt to be more specific
+const systemPrompt = prompts.chatGeneration;
 
-Your response should be related to the user input.
-`;
+// Use the same analysis prompt as BiasChecker
+const biasAnalysisPrompt = prompts.biasAnalysis;
 
-// Update the system prompt for bias analysis
-const biasAnalysisPrompt = `You are a bias detection system. Analyze the following text for potential biases. 
-You must thoroughly check for these specific categories of bias:
-
-1. Cognitive Biases:
-- Confirmation Bias (interpreting information to confirm existing beliefs)
-- Anchoring Bias (over-relying on first piece of information)
-- Availability Bias (overestimating likelihood based on memorable examples)
-- Status Quo Bias (preference for current state of affairs)
-
-2. Social Biases:
-- Gender Bias (stereotyping or discrimination based on gender)
-- Age Bias (prejudice against age groups)
-- Racial/Ethnic Bias (prejudice based on race or ethnicity)
-- Cultural Bias (favoring one culture's viewpoints over others)
-
-3. Professional Biases:
-- Authority Bias (giving excessive weight to authority figures)
-- In-group Bias (favoring members of one's own group)
-- Experience Bias (over-relying on personal experience)
-- Selection Bias (using non-representative data or examples)
-
-4. Language Biases:
-- Framing Bias (how information presentation influences decisions)
-- Loaded Language (words carrying strong positive/negative implications)
-- Generalization (making broad statements about groups)
-- Exclusionary Language (terms that exclude certain groups)
-
-For each bias found, you must provide:
-1. The exact biased phrase from the input
-2. The specific type of bias from the categories above
-3. A clear, actionable suggestion for alternative phrasing
-
-Respond with valid JSON in this format only:
-{
-  "biases": [
-    {
-      "phrase": "exact biased text from input",
-      "type": "specific type of bias from the categories above",
-      "suggestion": "suggested alternative phrasing that eliminates the bias"
-    }
-  ]
+// Add this helper function at the top of the file
+function cleanBiasType(type) {
+    // Remove duplicate "Bias" and clean up spacing
+    return type
+        .replace(/\s*Bias\s*Bias$/i, ' Bias')  // Remove duplicate at end
+        .replace(/^Bias\s*Bias\s*/i, 'Bias ')  // Remove duplicate at start
+        .replace(/\s+/g, ' ')                  // Clean up extra spaces
+        .trim();
 }
-
-If no biases are found, respond with: {"biases": []}
-
-Important: You must be thorough and identify subtle biases. Even seemingly neutral language should be analyzed for underlying assumptions and biases.`;
 
 app.post('/api/process', async (req, res) => {
   console.log('\n=== New Message Processing ===');
@@ -219,7 +180,11 @@ app.post('/api/process', async (req, res) => {
       const biasContent = biasAnalysisResponse.data.choices[0].message.content;
       console.log('6. Raw bias analysis:', biasContent);
       const biasAnalysis = JSON.parse(biasContent);
-      biases = biasAnalysis.biases;
+      // Clean up bias types
+      biases = biasAnalysis.biases.map(bias => ({
+          ...bias,
+          type: cleanBiasType(bias.type)
+      }));
       console.log('7. Parsed biases:', biases);
     } catch (parseError) {
       console.error('Error parsing bias analysis:', parseError);
@@ -312,6 +277,13 @@ app.post('/api/analyze-bias', async (req, res) => {
     let analysis;
     try {
       analysis = JSON.parse(content);
+      // Clean up bias types
+      if (analysis.biases) {
+        analysis.biases = analysis.biases.map(bias => ({
+          ...bias,
+          type: cleanBiasType(bias.type)
+        }));
+      }
       console.log('Parsed Bias Analysis:', analysis);
     } catch (parseError) {
       console.error('Error parsing OpenAI response:', content);

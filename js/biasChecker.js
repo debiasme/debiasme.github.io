@@ -1,6 +1,7 @@
 import { stateManager } from "./stateManager.js";
 import { messageHandler } from "./messageHandler.js";
 import { BiasVisualizer } from "./biasVisualizer.js";
+import { prompts } from './prompts.js';
 
 /**
  * BiasChecker class to handle bias detection and response
@@ -8,55 +9,7 @@ import { BiasVisualizer } from "./biasVisualizer.js";
 class BiasChecker {
   constructor() {
     this.visualizer = new BiasVisualizer();
-    // Make the system prompt static so it can be accessed from anywhere
-    BiasChecker.systemPrompt = `You are a bias detection system. Analyze the following text for potential biases. 
-    You must thoroughly check for these specific categories of bias:
-
-    1. Cognitive Biases:
-    - Confirmation Bias (interpreting information to confirm existing beliefs)
-    - Anchoring Bias (over-relying on first piece of information)
-    - Availability Bias (overestimating likelihood based on memorable examples)
-    - Status Quo Bias (preference for current state of affairs)
-    
-    2. Social Biases:
-    - Gender Bias (stereotyping or discrimination based on gender)
-    - Age Bias (prejudice against age groups)
-    - Racial/Ethnic Bias (prejudice based on race or ethnicity)
-    - Cultural Bias (favoring one culture's viewpoints over others)
-    
-    3. Professional Biases:
-    - Authority Bias (giving excessive weight to authority figures)
-    - In-group Bias (favoring members of one's own group)
-    - Experience Bias (over-relying on personal experience)
-    - Selection Bias (using non-representative data or examples)
-
-    4. Language Biases:
-    - Framing Bias (how information presentation influences decisions)
-    - Loaded Language (words carrying strong positive/negative implications)
-    - Generalization (making broad statements about groups)
-    - Exclusionary Language (terms that exclude certain groups)
-
-    For each bias found, you must provide:
-    1. The exact biased phrase from the input
-    2. The specific type of bias from the categories above
-    3. A clear, actionable suggestion for alternative phrasing
-    
-    Respond with valid JSON in this format only:
-    {
-      "biases": [
-        {
-          "phrase": "exact biased text from input",
-          "type": "specific type of bias from the categories above",
-          "suggestion": "suggested alternative phrasing that eliminates the bias"
-        }
-      ]
-    }
-    
-    If no biases are found, respond with: {"biases": []}
-    
-    Important: You must be thorough and identify subtle biases. Even seemingly neutral language should be analyzed for underlying assumptions and biases.`;
-
-    // Use the static property for instance access
+    BiasChecker.systemPrompt = prompts.biasAnalysis;
     this.systemPrompt = BiasChecker.systemPrompt;
 
     // Remove mobile-specific touch events
@@ -135,6 +88,15 @@ class BiasChecker {
         }
 
         const analysis = await response.json();
+        
+        // Clean up bias types to prevent duplication of "Bias" word
+        if (analysis.biases) {
+            analysis.biases = analysis.biases.map(bias => ({
+                ...bias,
+                type: bias.type.replace(/\s*Bias\s*Bias$/i, ' Bias')  // Remove duplicate "Bias"
+            }));
+        }
+        
         console.log('Analysis response:', analysis);
         return analysis;
     } catch (error) {
