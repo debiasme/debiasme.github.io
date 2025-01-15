@@ -84,12 +84,39 @@ function createThinkingAnimation(type = 'bias') {
     const thinking = document.createElement('div');
     thinking.className = 'thinking';
     
-    // Add appropriate text based on type
     const text = document.createElement('span');
     text.className = 'thinking-text';
-    text.textContent = type === 'bias' 
-        ? 'Analyzing text for bias'
-        : 'Generating visualization map';
+    
+    if (type === 'bias') {
+        text.textContent = 'Analyzing text for potential biases...';
+    } else {
+        // For map generation, we'll update the text periodically
+        text.textContent = 'Analyzing response and generating visualization...';
+        let stage = 0;
+        const stages = [
+            'Analyzing response and generating visualization...',
+            'Creating bias connections...',
+            'Building interactive visualization map...',
+            'Almost there...'
+        ];
+        
+        const updateText = setInterval(() => {
+            stage = (stage + 1) % (stages.length - 1); // Don't loop back to start
+            text.textContent = stages[stage];
+            
+            // When we reach "Almost there...", stop updating
+            if (stage === stages.length - 2) {
+                clearInterval(updateText);
+                // Set final message after a delay
+                setTimeout(() => {
+                    text.textContent = stages[stages.length - 1];
+                }, 4000);
+            }
+        }, 5000);
+        
+        thinking.dataset.intervalId = updateText;
+    }
+    
     thinking.appendChild(text);
     
     // Add dots
@@ -116,7 +143,7 @@ async function handleSendMessage() {
   messageHandler.appendToChatBox(userMessageElement);
 
   // Show thinking animation in chat
-  const thinking = createThinkingAnimation();
+  const thinking = createThinkingAnimation('map');
   messageHandler.appendToChatBox(thinking);
 
   // Send message to Azure
@@ -159,10 +186,13 @@ async function handleAzureResponse(userMessage) {
       throw new Error(data.error?.message || 'Failed to process the request');
     }
 
-    // Remove thinking animation
+    // Remove thinking animation and clear interval
     const thinking = document.querySelector('.thinking');
     if (thinking) {
-      thinking.remove();
+        if (thinking.dataset.intervalId) {
+            clearInterval(Number(thinking.dataset.intervalId));
+        }
+        thinking.remove();
     }
 
     // Display AI response with biases
