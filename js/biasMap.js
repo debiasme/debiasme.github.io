@@ -172,9 +172,6 @@ export class BiasMap {
                             
                             <p><strong>Why is it problematic?</strong></p>
                             ${explanation.why}
-                            
-                            <p><strong>How to improve:</strong></p>
-                            <p>${d.suggestion}</p>
                         </div>
                         `,
                         [{ text: "Got it", type: "primary" }]
