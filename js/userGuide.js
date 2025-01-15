@@ -213,18 +213,19 @@ export class UserGuide {
 
             case 'click':
                 if (target.id === 'detect-bias-button') {
-                    // For detect bias button, wait for highlights to appear
                     target.addEventListener('click', () => {
+                        tooltip.remove();
+                        
                         const checkHighlights = setInterval(() => {
                             const highlightContainer = document.querySelector('.highlight-container');
                             if (highlightContainer) {
                                 clearInterval(checkHighlights);
-                                this.handleStepComplete(tooltip);
+                                this.currentStep++;
+                                this.showNextStep();
                             }
                         }, 100);
                     }, { once: true });
                 } else {
-                    // For other buttons, proceed immediately
                     target.addEventListener('click', () => this.handleStepComplete(tooltip), { once: true });
                 }
                 break;
