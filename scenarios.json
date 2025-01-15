@@ -1,13 +1,5 @@
 [
   {
-    "input": "Why are all managers bad at their jobs?",
-    "bias": "Overgeneralisation",
-    "feedback": "Your input assumes all managers perform poorly.",
-    "response": "Management effectiveness varies greatly between individuals and contexts.",
-    "refinedPrompt": "What challenges do managers often face that may affect their performance?",
-    "refinedResponse": "Managers often face challenges in balancing team needs, resources, and organizational goals."
-  },
-  {
     "input": "Tell me why women are better leaders.",
     "bias": "Confirmation Bias",
     "feedback": "Your input assumes inherent gender-based superiority in leadership.",
