@@ -2,6 +2,7 @@ import { stateManager } from './stateManager.js';
 import { messageHandler } from './messageHandler.js';
 import { biasChecker } from './biasChecker.js';
 import { environment } from './environment.js';
+import { UserGuide } from './userGuide.js';
 
 // Global variable to track Azure API usage
 let useAzure = false; // Initialize useAzure flag
@@ -241,6 +242,11 @@ async function handleDetectBias() {
 }
 
 // Call initializeApp when the document is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  initializeApp();
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('DOM loaded');  // Debug log
+  await initializeApp();
+  
+  console.log('Initializing guide');  // Debug log
+  const guide = new UserGuide();
+  guide.show();
 });
