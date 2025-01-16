@@ -105,7 +105,7 @@ function createThinkingAnimation(type = 'bias') {
             stage = (stage + 1) % (stages.length - 1); // Don't loop back to start
             text.textContent = stages[stage];
             
-            // When we reach "Almost there...", stop updating
+            // When we reach "Almost there....", stop updating
             if (stage === stages.length - 2) {
                 clearInterval(updateText);
                 // Set final message after a delay
