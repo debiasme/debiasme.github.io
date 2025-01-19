@@ -14,7 +14,7 @@ async function initializeApp() {
     // Load scenarios with path handling for GitHub Pages
     const basePath = window.location.hostname === 'cmlmanni.github.io' ? '/AyeEye' : '';
     const response = await fetch(`${basePath}/scenarios.json`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to load scenarios: ${response.statusText}`);
     }
@@ -24,7 +24,7 @@ async function initializeApp() {
 
     // Set up event listeners
     setupEventListeners();
-    
+
     // Populate select dropdown
     populateSelectDropdown(scenarios);
   } catch (error) {
@@ -35,7 +35,7 @@ async function initializeApp() {
 
 function setupEventListeners() {
   // Select dropdown
-  document.getElementById("user-select").addEventListener("change", function() {
+  document.getElementById("user-select").addEventListener("change", function () {
     const userInput = document.getElementById("user-input");
     userInput.value = this.value;
     // userInput.disabled = !!this.value;
@@ -49,19 +49,19 @@ function setupEventListeners() {
     biasCheckerEnabled = !biasCheckerEnabled;
     const toggleButton = document.getElementById("toggle-bias-checker");
     const detectBiasButton = document.getElementById("detect-bias-button");
-    
+
     if (biasCheckerEnabled) {
-        toggleButton.textContent = 'Disable Bias Checker';
-        toggleButton.classList.add('bias-checker-enabled');
-        toggleButton.classList.remove('bias-checker-disabled');
-        detectBiasButton.disabled = false;
-        detectBiasButton.style.opacity = '1';
+      toggleButton.textContent = 'Disable Bias Checker';
+      toggleButton.classList.add('bias-checker-enabled');
+      toggleButton.classList.remove('bias-checker-disabled');
+      detectBiasButton.disabled = false;
+      detectBiasButton.style.opacity = '1';
     } else {
-        toggleButton.textContent = 'Enable Bias Checker';
-        toggleButton.classList.remove('bias-checker-enabled');
-        toggleButton.classList.add('bias-checker-disabled');
-        detectBiasButton.disabled = true;
-        detectBiasButton.style.opacity = '0.7';
+      toggleButton.textContent = 'Enable Bias Checker';
+      toggleButton.classList.remove('bias-checker-enabled');
+      toggleButton.classList.add('bias-checker-disabled');
+      detectBiasButton.disabled = true;
+      detectBiasButton.style.opacity = '0.7';
     }
   });
 
@@ -81,59 +81,59 @@ function populateSelectDropdown(scenarios) {
 
 // Create thinking animation with specific text
 function createThinkingAnimation(type = 'bias') {
-    const thinking = document.createElement('div');
-    thinking.className = 'thinking';
-    
-    const text = document.createElement('span');
-    text.className = 'thinking-text';
-    
-    if (type === 'bias') {
-        text.textContent = 'Analyzing text for potential biases...';
-    } else {
-        // For map generation, we'll update the text periodically
-        text.textContent = 'Analyzing response...';
-        let stage = 0;
-        const stages = [
-            'Analyzing response...',
-            'Generating visualization...',
-            'Creating bias connections...',
-            'Building interactive visualization map...',
-            'Almost there...'
-        ];
-        
-        const updateText = setInterval(() => {
-            stage = (stage + 1) % (stages.length - 1); // Don't loop back to start
-            text.textContent = stages[stage];
-            
-            // When we reach "Almost there....", stop updating
-            if (stage === stages.length - 2) {
-                clearInterval(updateText);
-                // Set final message after a delay
-                setTimeout(() => {
-                    text.textContent = stages[stages.length - 1];
-                }, 4000);
-            }
-        }, 5000);
-        
-        thinking.dataset.intervalId = updateText;
-    }
-    
-    thinking.appendChild(text);
-    
-    // Add dots
-    for (let i = 0; i < 3; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        thinking.appendChild(dot);
-    }
-    
-    return thinking;
+  const thinking = document.createElement('div');
+  thinking.className = 'thinking';
+
+  const text = document.createElement('span');
+  text.className = 'thinking-text';
+
+  if (type === 'simple') {
+    text.textContent = 'Getting response';
+  } else if (type === 'bias') {
+    text.textContent = 'Analyzing text for potential biases';
+  } else {
+    // For map generation, we'll update the text periodically
+    text.textContent = 'Analyzing response';
+    let stage = 0;
+    const stages = [
+      'Analyzing response',
+      'Generating visualization',
+      'Creating bias connections',
+      'Building interactive visualization map',
+      'Almost there'
+    ];
+
+    const updateText = setInterval(() => {
+      stage = (stage + 1) % (stages.length - 1);
+      text.textContent = stages[stage];
+
+      if (stage === stages.length - 2) {
+        clearInterval(updateText);
+        setTimeout(() => {
+          text.textContent = stages[stages.length - 1];
+        }, 4000);
+      }
+    }, 5000);
+
+    thinking.dataset.intervalId = updateText;
+  }
+
+  thinking.appendChild(text);
+
+  // Add dots
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    thinking.appendChild(dot);
+  }
+
+  return thinking;
 }
 
 async function handleSendMessage() {
   const userInput = document.getElementById("user-input");
   const message = userInput.value.trim();
-  
+
   if (!message) {
     alert("Please enter or select a message");
     return;
@@ -143,8 +143,8 @@ async function handleSendMessage() {
   const userMessageElement = messageHandler.createMessageElement('user-message', message);
   messageHandler.appendToChatBox(userMessageElement);
 
-  // Show thinking animation in chat
-  const thinking = createThinkingAnimation('map');
+  // Show appropriate thinking animation based on bias checker state
+  const thinking = createThinkingAnimation(biasCheckerEnabled ? 'map' : 'simple');
   messageHandler.appendToChatBox(thinking);
 
   // Send message to Azure
@@ -163,18 +163,18 @@ async function handleSendMessage() {
 async function handleAzureResponse(userMessage) {
   try {
     console.log('Sending message to server:', userMessage);
-    
-    const apiUrl = environment.isDevelopment 
-      ? 'http://localhost:3000' 
+
+    const apiUrl = environment.isDevelopment
+      ? 'http://localhost:3000'
       : 'https://ayeeye.onrender.com';
-    
+
     const response = await fetch(`${apiUrl}/api/process`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         input: userMessage,
         biasCheckerEnabled: biasCheckerEnabled
       }),
@@ -190,10 +190,10 @@ async function handleAzureResponse(userMessage) {
     // Remove thinking animation and clear interval
     const thinking = document.querySelector('.thinking');
     if (thinking) {
-        if (thinking.dataset.intervalId) {
-            clearInterval(Number(thinking.dataset.intervalId));
-        }
-        thinking.remove();
+      if (thinking.dataset.intervalId) {
+        clearInterval(Number(thinking.dataset.intervalId));
+      }
+      thinking.remove();
     }
 
     // Display AI response with biases
@@ -202,14 +202,14 @@ async function handleAzureResponse(userMessage) {
       data.response,
       data.biases
     );
-    
+
     messageHandler.appendToChatBox(aiMessage);
 
   } catch (error) {
     console.error('Error processing Azure response:', error);
     const thinking = document.querySelector('.thinking');
     if (thinking) thinking.remove();
-    
+
     const errorMessage = messageHandler.createMessageElement(
       'ai-message error-message',
       error.message || "Sorry, there was an error processing your request."
@@ -221,7 +221,7 @@ async function handleAzureResponse(userMessage) {
 async function handleDetectBias() {
   const userInput = document.getElementById("user-input");
   const message = userInput.value.trim();
-  
+
   if (!message) {
     alert("Please enter a message to analyze");
     return;
@@ -242,7 +242,7 @@ async function handleDetectBias() {
     inputWrapper.insertBefore(thinking, userInput);
 
     const analyzedContent = await biasChecker.handleBiasCheck(message, userInput);
-    
+
     // Remove thinking animation
     thinking.remove();
 
@@ -263,10 +263,10 @@ async function handleDetectBias() {
       const highlightContainer = document.createElement('div');
       highlightContainer.className = 'highlight-container';
       highlightContainer.appendChild(analyzedContent);
-      
+
       inputWrapper.insertBefore(highlightContainer, userInput);
       userInput.style.display = 'none';
-      
+
       // Add a close button to restore input
       const closeButton = document.createElement('button');
       closeButton.className = 'close-highlight';
@@ -287,8 +287,9 @@ async function handleDetectBias() {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOM loaded');  // Debug log
   await initializeApp();
-  
+
   console.log('Initializing guide');  // Debug log
   const guide = new UserGuide();
   guide.show();
 });
+

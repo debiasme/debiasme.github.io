@@ -1103,3 +1103,11 @@ body {
         padding-right: max(15px, env(safe-area-inset-right));
     }
 }
+
+/* Footer */
+.footer {
+    position: fixed;
+    width: 100%;
+    text-align: center;
+    color: #e0e0e0;
+}

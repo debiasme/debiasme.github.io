@@ -130,14 +130,14 @@ app.post('/api/process', async (req, res) => {
     // If bias checker is disabled, send direct response without system prompt
     if (!biasCheckerEnabled) {
       console.log('Bias checker disabled - sending direct response');
-      // Remove unnecessary DNS check and simplify the request
       const response = await axiosInstance.post(
         `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT}/chat/completions`,
         {
-          messages: [{ role: "user", content: userInput }],
+          messages: [
+            { role: "user", content: userInput }  // Send only user input without system prompt
+          ],
           max_tokens: 800,
           temperature: 0.7,
-          // Add stream: false to ensure faster non-streaming response
           stream: false
         },
         {
@@ -146,7 +146,6 @@ app.post('/api/process', async (req, res) => {
             'api-key': AZURE_API_KEY,
             'Content-Type': 'application/json',
           },
-          // Reduce timeout for direct messages
           timeout: 30000
         }
       );
@@ -154,7 +153,7 @@ app.post('/api/process', async (req, res) => {
       return res.json({
         success: true,
         response: response.data.choices[0].message.content,
-        biases: []
+        biases: []  // No bias analysis when disabled
       });
     }
 
