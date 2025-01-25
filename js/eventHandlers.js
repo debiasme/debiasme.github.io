@@ -15,10 +15,10 @@ function setupSelectListener() {
     
     if (selectedMessage) {
       userInput.value = selectedMessage;
-      userInput.disabled = true;
+      // userInput.disabled = true;
     } else {
       userInput.value = "";
-      userInput.disabled = false;
+      // userInput.disabled = false;
     }
   });
 }
@@ -32,3 +32,4 @@ function setupSendMessageListener() {
   document.getElementById("send-button")
     .addEventListener("click", sendMessage);
 } 
+

@@ -1,0 +1,233 @@
+.guide-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.guide-content {
+    background: #1f2937;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.guide-content h2 {
+    color: #a78bfa;
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    text-align: center;
+}
+
+.guide-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.guide-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #e5e7eb;
+}
+
+.step-number {
+    background: #4c1d95;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.guide-start-button {
+    background: #6366f1;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 24px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.guide-start-button:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+}
+
+.guide-tooltip {
+    position: fixed;
+    background: #1f2937;
+    border-radius: 8px;
+    padding: 16px;
+    max-width: 300px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    z-index: 10000;
+    animation: tooltipAppear 0.3s ease-out;
+}
+
+.tooltip-content {
+    color: #e5e7eb;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.tooltip-progress {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 8px;
+    text-align: right;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes tooltipAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 480px) {
+    .guide-content {
+        padding: 20px;
+    }
+
+    .guide-content h2 {
+        font-size: 20px;
+    }
+
+    .guide-step {
+        font-size: 14px;
+    }
+}
+
+.guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.guide-skip-link, .tooltip-skip-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.tooltip-skip-link {
+    font-size: 12px;
+}
+
+.guide-skip-link:hover, .tooltip-skip-link:hover {
+    color: #e5e7eb;
+}
+
+.guide-skip-link svg, .tooltip-skip-link svg {
+    transition: transform 0.2s ease;
+}
+
+.guide-skip-link:hover svg, .tooltip-skip-link:hover svg {
+    transform: translateX(2px);
+}
+
+.guide-skip-button, .tooltip-skip-button {
+    display: none;
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.tooltip-header p {
+    margin: 0;
+    flex: 1;
+}
+
+.tooltip-skip-button {
+    font-size: 12px;
+    padding: 2px 6px;
+}
+
+.tooltip-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(156, 163, 175, 0.1);
+}
+
+.tooltip-next-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tooltip-next-button:hover {
+    background: #4f46e5;
+}
+
+.tooltip-next-button svg {
+    transition: transform 0.2s ease;
+}
+
+.tooltip-next-button:hover svg {
+    transform: translateX(2px);
+}
+
+/* Move progress to footer */
+.tooltip-progress {
+    margin-top: 0;
+} 
