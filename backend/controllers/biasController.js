@@ -9,6 +9,7 @@ const API_VERSION = "2024-12-01-preview";
 export async function analyzeBias(req, res) {
   try {
     const { userInput } = req.body;
+    // Always use the default bias analysis prompt
     const content = await callAzureOpenAI(
       [
         { role: "system", content: prompts.biasAnalysis },
