@@ -1,7 +1,7 @@
 import { stateManager } from "./stateManager.js";
 import { messageHandler } from "./messageHandler.js";
 import { BiasVisualizer } from "./biasVisualizer.js";
-import { prompts } from './prompts.js';
+import { environment } from "./environment.js";
 
 /**
  * BiasChecker class to handle bias detection and response
@@ -9,10 +9,6 @@ import { prompts } from './prompts.js';
 class BiasChecker {
   constructor() {
     this.visualizer = new BiasVisualizer();
-    BiasChecker.systemPrompt = prompts.biasAnalysis;
-    this.systemPrompt = BiasChecker.systemPrompt;
-
-    // Remove mobile-specific touch events
   }
 
   async handleDetectBias() {
@@ -20,30 +16,30 @@ class BiasChecker {
     if (!input || !input.value.trim()) return;
 
     try {
-        // Show loading state
-        const detectButton = document.getElementById("detect-bias-button");
-        const originalText = detectButton.textContent;
-        detectButton.textContent = "Detecting...";
-        detectButton.disabled = true;
+      // Show loading state
+      const detectButton = document.getElementById("detect-bias-button");
+      const originalText = detectButton.textContent;
+      detectButton.textContent = "Detecting...";
+      detectButton.disabled = true;
 
-        const result = await this.handleBiasCheck(input.value, input);
-        
-        // Reset button state
-        detectButton.textContent = originalText;
-        detectButton.disabled = false;
+      const result = await this.handleBiasCheck(input.value, input);
 
-        if (result) {
-            const container = document.createElement('div');
-            container.className = 'input-container';
-            container.appendChild(result);
-            input.parentNode.replaceChild(container, input);
-        }
+      // Reset button state
+      detectButton.textContent = originalText;
+      detectButton.disabled = false;
+
+      if (result) {
+        const container = document.createElement("div");
+        container.className = "input-container";
+        container.appendChild(result);
+        input.parentNode.replaceChild(container, input);
+      }
     } catch (error) {
-        console.error('Error in handleDetectBias:', error);
-        // Reset button state on error
-        const detectButton = document.getElementById("detect-bias-button");
-        detectButton.textContent = "Detect Bias";
-        detectButton.disabled = false;
+      console.error("Error in handleDetectBias:", error);
+      // Reset button state on error
+      const detectButton = document.getElementById("detect-bias-button");
+      detectButton.textContent = "Detect Bias";
+      detectButton.disabled = false;
     }
   }
 
@@ -65,43 +61,39 @@ class BiasChecker {
 
   async analyzeText(text) {
     try {
-        console.log('Analyzing text:', text);
-        const apiUrl = window.location.hostname === 'localhost' || 
-                      window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:3000/api/analyze-bias'
-            : 'https://ayeeye.onrender.com/api/analyze-bias';
+      console.log("Analyzing text:", text);
+      const apiUrl = `${environment.apiUrl}/api/analyze-bias`;
+      console.log("API URL:", apiUrl);
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userInput: text,
+        }),
+      });
 
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                systemPrompt: this.systemPrompt,
-                userInput: text,
-            }),
-        });
-
-        if (!response.ok) {
-            console.error(`HTTP error! status: ${response.status}`);
-            return { biases: [] };
-        }
-
-        const analysis = await response.json();
-        
-        // Clean up bias types to prevent duplication of "Bias" word
-        if (analysis.biases) {
-            analysis.biases = analysis.biases.map(bias => ({
-                ...bias,
-                type: bias.type.replace(/\s*Bias\s*Bias$/i, ' Bias')  // Remove duplicate "Bias"
-            }));
-        }
-        
-        console.log('Analysis response:', analysis);
-        return analysis;
-    } catch (error) {
-        console.error("Error analyzing bias:", error);
+      if (!response.ok) {
+        console.error(`HTTP error! status: ${response.status}`);
         return { biases: [] };
+      }
+
+      const analysis = await response.json();
+
+      // Clean up bias types to prevent duplication of "Bias" word
+      if (analysis.biases) {
+        analysis.biases = analysis.biases.map((bias) => ({
+          ...bias,
+          type: bias.type.replace(/\s*Bias\s*Bias$/i, " Bias"), // Remove duplicate "Bias"
+        }));
+      }
+
+      console.log("Analysis response:", analysis);
+      return analysis;
+    } catch (error) {
+      console.error("Error analyzing bias:", error);
+      return { biases: [] };
     }
   }
 
@@ -116,16 +108,20 @@ class BiasChecker {
 
     try {
       const analysis = await this.analyzeText(text);
-      console.log('Bias analysis result:', analysis); // Add logging
+      console.log("Bias analysis result:", analysis); // Add logging
 
       if (!analysis || !analysis.biases || analysis.biases.length === 0) {
-        console.log('No biases detected'); // Add logging
+        console.log("No biases detected"); // Add logging
         return document.createTextNode(text);
       }
 
-      return this.visualizer.highlightBiases(text, analysis.biases, inputElement);
+      return this.visualizer.highlightBiases(
+        text,
+        analysis.biases,
+        inputElement
+      );
     } catch (error) {
-      console.error('Error in handleBiasCheck:', error);
+      console.error("Error in handleBiasCheck:", error);
       return document.createTextNode(text);
     }
   }
