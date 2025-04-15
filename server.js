@@ -1,8 +1,13 @@
 import express from "express";
 import cors from "cors";
-import chatRoutes from "./routes/chatRoutes.js";
-import biasRoutes from "./routes/biasRoutes.js";
-import { checkDNSConnection, getHostname } from "./utils/dnsUtils.js";
+import chatRoutes from "./backend/routes/chatRoutes.js";
+import biasRoutes from "./backend/routes/biasRoutes.js";
+import { checkDNSConnection, getHostname } from "./backend/utils/dnsUtils.js";
+import {
+  AZURE_API_KEY,
+  AZURE_ENDPOINT,
+  AZURE_DEPLOYMENT,
+} from "./backend/config.js";
 
 const app = express();
 const PORT = 3000;
