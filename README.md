@@ -1,4 +1,4 @@
-# AyeEye
+# DeBiasMe
 
 An interactive web application that helps users identify and understand bias in their language through real-time analysis and visual feedback.
 
@@ -10,26 +10,6 @@ An interactive web application that helps users identify and understand bias in 
 - 🎨 Particle-based ambient background
 - 📱 Fully responsive design for all devices
 - ✨ Smooth animations and transitions
-
-## Getting Started
-
-### Prerequisites
-
-- Modern web browser
-- Local development server (e.g., Live Server for VS Code)
-- Node.js and npm (for development)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/cmlmanni/AyeEye.git
-cd AyeEye
-```
-
-2. Start a local development server:
-   - If using VS Code with Live Server extension, right-click `index.html` and select "Open with Live Server"
-   - Or use any other local server of your choice
 
 ### Usage
 
@@ -52,60 +32,6 @@ cd AyeEye
 - P5.js for particle animation
 - Custom state management with pub/sub pattern
 - Azure OpenAI integration for bias analysis
-
-### Key Components
-
-- `BiasChecker`: Handles bias detection and analysis
-- `BiasVisualizer`: Creates interactive bias highlights
-- `BiasMap`: Generates D3-powered visualization maps
-- `MessageHandler`: Manages chat interface and responses
-- `StateManager`: Handles application state
-- `Environment`: Manages deployment configurations
-
-### File Structure
-
-```
-ayeeye/
-├── css/
-│   ├── styles.css
-│   └── guide.css
-├── js/
-│   ├── biasChecker.js
-│   ├── biasVisualizer.js
-│   ├── biasMap.js
-│   ├── environment.js
-│   ├── eventHandlers.js
-│   ├── messageHandler.js
-│   ├── prompts.js
-│   ├── script.js
-│   ├── sketch.js
-│   ├── stateManager.js
-│   └── userGuide.js
-├── scenarios.json
-└── index.html
-```
-
-## Development
-
-### Environment Setup
-
-The application supports both development and production environments:
-- Development: Uses localhost API endpoint
-- Production: Uses deployed API endpoint
-
-### Adding New Features
-
-1. Bias Detection:
-   - Extend `BiasChecker` for new bias types
-   - Update `prompts.js` with new analysis patterns
-
-2. Visualization:
-   - Modify `BiasMap` for new visualization features
-   - Update `BiasVisualizer` for new highlight styles
-
-3. UI Components:
-   - Add styles to `styles.css`
-   - Implement new handlers in `eventHandlers.js`
 
 ## Contributing
 
