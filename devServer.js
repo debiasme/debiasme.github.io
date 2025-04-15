@@ -1,6 +1,6 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -8,12 +8,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 5501;
 
-app.use(express.static(__dirname));
+// Serve static assets from frontend/
+app.use(express.static(path.join(__dirname, "frontend")));
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+// Serve index.html only for unknown routes (not for static files)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.listen(PORT, () => {
   console.log(`Frontend server running at http://localhost:${PORT}`);
-}); 
+});
