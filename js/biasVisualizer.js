@@ -97,7 +97,6 @@ export class BiasVisualizer {
       const editButton = tooltip.querySelector(".edit-button");
       const tipsButton = tooltip.querySelector(".tips-button");
       const editSuggestion = tooltip.querySelector(".edit-suggestion");
-      const confirmEdit = tooltip.querySelector(".confirm-edit");
 
       // Show tooltip on hover
       highlight.addEventListener("mouseenter", () => {
@@ -129,32 +128,52 @@ export class BiasVisualizer {
       // Button handlers
       editButton.addEventListener("click", (e) => {
         e.stopPropagation();
+
+        // Display the edit suggestion section
         editSuggestion.style.display = "block";
-      });
 
-      confirmEdit.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const originalText = highlight.dataset.original;
-        const suggestionText = highlight.dataset.suggestion;
+        // Update the content with properly structured HTML
+        editSuggestion.innerHTML = `
+          <div class="suggestion-header">Suggestion to improve:</div>
+          <div class="bias-suggestion">${highlight.dataset.suggestion}</div>
+          <button class="confirm-edit">Confirm Edit</button>
+        `;
 
-        if (inputElement) {
-          // Preserve the surrounding text structure
-          const fullText = inputElement.value;
-          const beforePhrase = fullText.substring(
-            0,
-            fullText.indexOf(originalText)
-          );
-          const afterPhrase = fullText.substring(
-            fullText.indexOf(originalText) + originalText.length
-          );
+        // IMPORTANT: Attach event listener to the newly created button
+        const newConfirmButton = editSuggestion.querySelector(".confirm-edit");
+        newConfirmButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const originalText = highlight.dataset.original;
+          const suggestionText = highlight.dataset.suggestion;
 
-          // Replace only the biased phrase while maintaining surrounding text
-          inputElement.value = beforePhrase + suggestionText + afterPhrase;
-        }
+          if (inputElement) {
+            // Preserve the surrounding text structure
+            const fullText = inputElement.value;
+            const beforePhrase = fullText.substring(
+              0,
+              fullText.indexOf(originalText)
+            );
+            const afterPhrase = fullText.substring(
+              fullText.indexOf(originalText) + originalText.length
+            );
 
-        highlight.textContent = suggestionText;
-        highlight.dataset.original = suggestionText;
-        tooltip.style.display = "none";
+            // Replace only the biased phrase while maintaining surrounding text
+            inputElement.value = beforePhrase + suggestionText + afterPhrase;
+          }
+
+          highlight.textContent = suggestionText;
+          highlight.dataset.original = suggestionText;
+          tooltip.style.display = "none";
+
+          // Dispatch a custom event to notify that text was edited
+          const editEvent = new CustomEvent("bias-text-edited", {
+            detail: {
+              original: originalText,
+              replacement: suggestionText,
+            },
+          });
+          document.dispatchEvent(editEvent);
+        });
       });
 
       tipsButton.addEventListener("click", (e) => {
@@ -172,13 +191,23 @@ export class BiasVisualizer {
           title = `${highlight.dataset.biasType} Bias Detected`;
         }
 
+        // Get the short explanation why this change matters based on bias type
+        const reflectionText = this.getReflectionText(
+          category,
+          subcategory,
+          type
+        );
+
         this.showDialog(
           title,
           `<p>This phrase shows bias:</p>
-           <p class="bias-phrase">"${highlight.dataset.original}"</p>
-           <p>Suggestion to improve:</p>
-           <p>${highlight.dataset.suggestion}</p>
-           <p><strong>Bias Type:</strong> ${highlight.dataset.biasType}</p>`,
+            <div class="bias-phrase">"${highlight.dataset.original}"</div>
+            <div class="suggestion-header">Suggestion to improve:</div>
+            <div class="bias-suggestion">${highlight.dataset.suggestion}</div>
+            <div class="bias-reflection">
+              <h4>Take a moment to think about:</h4>
+              <p>${reflectionText}</p>
+            </div>`,
           [{ text: "Got it", type: "primary" }]
         );
       });
@@ -227,6 +256,58 @@ export class BiasVisualizer {
 
     document.body.appendChild(overlay);
     document.body.appendChild(dialog);
+  }
+
+  getReflectionText(category, subcategory, type) {
+    // Default reflection text if no specific match
+    let reflection =
+      "Consider how language choices impact inclusivity and fairness in communication.";
+
+    // Customize reflection text based on bias type
+    if (category && subcategory) {
+      if (category.toLowerCase().includes("human")) {
+        if (subcategory.toLowerCase().includes("individual")) {
+          reflection =
+            "Individual biases often reflect our personal experiences and assumptions. Being aware of them helps us communicate more objectively.";
+        } else if (subcategory.toLowerCase().includes("group")) {
+          reflection =
+            "Group-based biases can reinforce stereotypes and exclude diverse perspectives. More inclusive language builds stronger connections.";
+        } else if (subcategory.toLowerCase().includes("cognitive")) {
+          reflection =
+            "Cognitive biases affect how we process information. Recognizing these patterns helps us make more balanced judgments.";
+        }
+      } else if (category.toLowerCase().includes("statistical")) {
+        reflection =
+          "Statistical biases can lead to misleading conclusions. More precise language ensures your message is grounded in accurate representation of data.";
+      } else if (category.toLowerCase().includes("systemic")) {
+        if (subcategory.toLowerCase().includes("historical")) {
+          reflection =
+            "Historical biases persist in our language. Choosing alternative phrasing helps break these long-standing patterns.";
+        } else if (subcategory.toLowerCase().includes("societal")) {
+          reflection =
+            "Societal biases reflect cultural norms that may exclude or marginalize certain groups. Inclusive language helps create more equitable communication.";
+        } else if (subcategory.toLowerCase().includes("institutional")) {
+          reflection =
+            "Institutional biases are embedded in formal structures. Awareness of these patterns helps create more fair and representative communications.";
+        }
+      }
+
+      // If we have even more specific type information
+      if (type) {
+        if (type.toLowerCase().includes("gender")) {
+          reflection =
+            "Gender-biased language can reinforce stereotypes and exclude individuals. Using gender-inclusive terms creates a more respectful and accurate message.";
+        } else if (type.toLowerCase().includes("racial")) {
+          reflection =
+            "Language with racial bias can perpetuate harmful stereotypes. More neutral terminology promotes respect and inclusion across diverse communities.";
+        } else if (type.toLowerCase().includes("age")) {
+          reflection =
+            "Age-based assumptions in language can marginalize certain age groups. Age-inclusive phrasing ensures your message resonates across generations.";
+        }
+      }
+    }
+
+    return reflection;
   }
 
   escapeHtml(text) {

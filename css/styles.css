@@ -785,26 +785,26 @@ body {
 /* Update the bias map node circle colors with Tol palette */
 
 /* Main Category node (center node) */
-.bias-map-circle.level-0 {
-  fill: #4477aa; /* Tol blue - replacing #6366f1 */
+.bias-map-node .bias-map-circle.level-0 {
+  fill: #4477aa; /* Tol blue */
   filter: drop-shadow(0 0 8px rgba(68, 119, 170, 0.5));
 }
 
 /* Category nodes */
-.bias-map-circle.level-1 {
-  fill: #66ccee; /* Tol cyan - replacing #8b5cf6 */
+.bias-map-node .bias-map-circle.level-1 {
+  fill: #66ccee; /* Tol cyan */
   filter: drop-shadow(0 0 5px rgba(102, 204, 238, 0.5));
 }
 
 /* Subcategory nodes */
-.bias-map-circle.level-2 {
-  fill: #ccbb44; /* Tol yellow - replacing #ec4899 */
+.bias-map-node .bias-map-circle.level-2 {
+  fill: #ccbb44; /* Tol yellow */
   filter: drop-shadow(0 0 5px rgba(204, 187, 68, 0.5));
 }
 
 /* Type nodes - red is fine from Tol palette but needs to be adjusted */
-.bias-map-circle.level-3 {
-  fill: #ee6677; /* Tol red - replacing #ef4444 */
+.bias-map-node .bias-map-circle.level-3 {
+  fill: #ee6677; /* Tol red */
   filter: drop-shadow(0 0 5px rgba(238, 102, 119, 0.5));
 }
 
@@ -838,26 +838,6 @@ body {
 .bias-map-link:hover {
   stroke: rgb(99, 102, 241);
   stroke-width: 3px;
-}
-
-.bias-map-circle.level-0 {
-  fill: #6366f1;
-  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
-}
-
-.bias-map-circle.level-1 {
-  fill: #8b5cf6;
-  filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
-}
-
-.bias-map-circle.level-2 {
-  fill: #ec4899;
-  filter: drop-shadow(0 0 5px rgba(236, 72, 153, 0.5));
-}
-
-.bias-map-circle.level-3 {
-  fill: #ef4444;
-  filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5));
 }
 
 .bias-map-label {
@@ -990,19 +970,6 @@ body {
   fill: #ef4444; /* Red for bias nodes */
   r: 10;
 }
-
-.bias-map-circle.level-0 {
-  fill: #6366f1;
-} /* Center node */
-.bias-map-circle.level-1 {
-  fill: #8b5cf6;
-} /* Categories */
-.bias-map-circle.level-2 {
-  fill: #ec4899;
-} /* Subcategories */
-.bias-map-circle.level-3 {
-  fill: #ef4444;
-} /* Types */
 
 .bias-map-label {
   fill: #fff;
@@ -1406,4 +1373,44 @@ body {
   width: 100%;
   text-align: center;
   color: #e0e0e0;
+}
+
+/* Add box styling for suggestion header and reflection section */
+.suggestion-header {
+  background-color: rgba(34, 136, 51, 0.2); /* Tol green transparent */
+  border-left: 3px solid #228833; /* Tol green */
+  padding: 5px 8px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  border-radius: 3px;
+}
+
+.bias-reflection {
+  background-color: rgba(102, 204, 238, 0.15); /* Tol cyan transparent */
+  border-left: 3px solid #66ccee; /* Tol cyan */
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.bias-reflection h4 {
+  color: #66ccee; /* Tol cyan */
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.bias-phrase {
+  background-color: rgba(238, 102, 119, 0.15); /* Tol red transparent */
+  border-left: 3px solid #ee6677; /* Tol red */
+  padding: 8px 12px;
+  margin: 10px 0;
+  font-size: 14px;
+  border-radius: 3px;
+}
+
+.bias-suggestion {
+  font-size: 14px;
+  line-height: 1.4;
 }
