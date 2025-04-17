@@ -1414,3 +1414,31 @@ body {
   font-size: 14px;
   line-height: 1.4;
 }
+
+/* Add these styles for better visualization of node sizes */
+
+/* Add count indicator on node hover */
+.bias-map-node:hover::after {
+  content: attr(data-count);
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  top: -15px;
+  right: -15px;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Make the node labels adjust based on the circle size */
+.bias-map-node .bias-map-label {
+  transition: all 0.3s ease;
+}
+
+.bias-map-node:hover .bias-map-label {
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}

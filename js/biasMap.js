@@ -289,7 +289,8 @@ export class BiasMap {
       .data(this.nodes)
       .join("g")
       .attr("class", (d) => `bias-map-node level-${d.level}`)
-      .attr("data-id", (d) => d.id);
+      .attr("data-id", (d) => d.id)
+      .attr("data-count", (d) => d.count || 1); // Add count as data attribute
 
     // Clear existing elements in nodes
     nodes.selectAll("*").remove();
@@ -299,24 +300,54 @@ export class BiasMap {
       .append("circle")
       .attr("class", (d) => `bias-map-circle level-${d.level}`)
       .attr("r", (d) => {
-        if (d.level === 0) return 30; // Central node
-        if (d.level === 1) return 20; // Categories
-        if (d.level === 2) return 15; // Subcategories
-        return 10; // Types
+        // Base radius by level
+        let baseRadius = 10; // Default for leaf nodes
+        if (d.level === 0) baseRadius = 30; // Central node
+        if (d.level === 1) baseRadius = 20; // Categories (Human, Statistical, Systemic)
+        if (d.level === 2) baseRadius = 15; // Subcategories
+
+        // If there's no count or it's 1, just use the base radius
+        if (!d.count || d.count <= 1) return baseRadius;
+
+        // IMPORTANT: Make the scaling factor more pronounced for level 1 (main categories)
+        // This will make Human Bias (count 2) visibly larger than the others (count 1)
+        const scalingFactor =
+          d.level === 0
+            ? 1.5
+            : d.level === 1
+            ? 5 // Increase from 2 to 5 for more visible difference
+            : d.level === 2
+            ? 3
+            : 4;
+
+        // Calculate scaled radius with more pronounced effect for small count differences
+        const scaledRadius = baseRadius + Math.sqrt(d.count) * scalingFactor;
+
+        // Apply level-specific min/max constraints
+        const maxRadius =
+          d.level === 0
+            ? 50
+            : d.level === 1
+            ? 40 // Increase from 35 to 40 to allow larger size differences
+            : d.level === 2
+            ? 30
+            : 25;
+
+        return Math.min(scaledRadius, maxRadius);
       });
 
     // Add count badges to nodes that have children
     nodes
-      .filter((d) => d.count)
+      .filter((d) => d.count > 1) // Only add badges to nodes with count > 1
       .append("circle")
       .attr("class", "node-count-badge")
       .attr("cx", (d) => (d.level === 0 ? 15 : 10))
       .attr("cy", -10)
       .attr("r", 10)
-      .attr("fill", "#ef4444");
+      .attr("fill", "#EE6677"); // Tol red
 
     nodes
-      .filter((d) => d.count)
+      .filter((d) => d.count > 1)
       .append("text")
       .attr("class", "node-count-text")
       .attr("x", (d) => (d.level === 0 ? 15 : 10))
