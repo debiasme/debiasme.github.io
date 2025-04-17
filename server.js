@@ -19,27 +19,11 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Use Render's port if available
 
 const isDev = process.env.NODE_ENV !== "production";
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5501",
-  "http://localhost:5502",
-  "http://127.0.0.1:5501",
-  "http://127.0.0.1:5502",
-  "https://cmlmanni.github.io",
-  "https://cmlmanni.github.io/AyeEye",
-  "https://debiasme.github.io",
-];
+const allowedOrigins = isDev ? true : ["https://ayeeye.onrender.com"];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1 || isDev) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: allowedOrigins,
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
     credentials: true,
