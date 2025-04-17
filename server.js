@@ -25,6 +25,7 @@ const allowedOrigins = isDev
       "https://ayeeye.onrender.com",
       "https://debiasme.github.io",
       "https://cmlmanni.github.io/AyeEye",
+      // undefined, // Add undefined as an allowed origin
     ];
 
 app.use((req, res, next) => {
@@ -34,7 +35,17 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+
+      // Check if origin is in allowed list or if all origins are allowed
+      if (allowedOrigins === true || allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
     credentials: true,
