@@ -21,7 +21,11 @@ const PORT = process.env.PORT || 3000; // Use Render's port if available
 const isDev = process.env.NODE_ENV !== "production";
 const allowedOrigins = isDev
   ? true
-  : ["https://ayeeye.onrender.com", "https://debiasme.github.io"];
+  : [
+      "https://ayeeye.onrender.com",
+      "https://debiasme.github.io",
+      "https://cmlmanni.github.io/AyeEye",
+    ];
 
 app.use(
   cors({
