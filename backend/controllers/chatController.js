@@ -31,6 +31,8 @@ axiosInstance.interceptors.response.use(undefined, async (err) => {
 
 export async function processMessage(req, res) {
   try {
+    console.log("processMessage endpoint called");
+
     const userInput = req.body.input;
     const biasCheckerEnabled = req.body.biasCheckerEnabled;
 

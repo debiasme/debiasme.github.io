@@ -17,7 +17,7 @@ async function initializeApp() {
       window.location.hostname === "cmlmanni.github.io"
         ? "/AyeEye/frontend"
         : "frontend";
-    const response = await fetch(`${basePath}/scenarios.json`);
+    const response = await fetch(`/scenarios.json`);
 
     if (!response.ok) {
       throw new Error(`Failed to load scenarios: ${response.statusText}`);

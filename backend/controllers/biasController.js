@@ -8,8 +8,8 @@ const API_VERSION = "2024-12-01-preview";
 
 export async function analyzeBias(req, res) {
   try {
+    console.log("analyzeBias endpoint called");
     const { userInput } = req.body;
-    // Always use the default bias analysis prompt
     const content = await callAzureOpenAI(
       [
         { role: "system", content: prompts.biasAnalysis },
@@ -17,6 +17,10 @@ export async function analyzeBias(req, res) {
       ],
       { max_tokens: 800, temperature: 0.7 }
     );
+
+    // Log the raw AI response for debugging
+    console.log("Raw AI response from Azure:", content);
+
     let analysis;
     try {
       analysis = JSON.parse(content);
@@ -26,9 +30,14 @@ export async function analyzeBias(req, res) {
           type: cleanBiasType(bias.type),
         }));
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to parse AI response JSON:", err);
       analysis = { biases: [] };
     }
+
+    // Log the parsed analysis for debugging
+    console.log("Parsed analysis:", analysis);
+
     res.json(analysis);
   } catch (error) {
     if (error.response) {

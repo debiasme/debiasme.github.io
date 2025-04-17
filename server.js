@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import chatRoutes from "./backend/routes/chatRoutes.js";
 import biasRoutes from "./backend/routes/biasRoutes.js";
 import { checkDNSConnection, getHostname } from "./backend/utils/dnsUtils.js";
@@ -8,6 +10,10 @@ import {
   AZURE_ENDPOINT,
   AZURE_DEPLOYMENT,
 } from "./backend/config.js";
+
+// These two lines are needed if you use ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -41,6 +47,12 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Serve static frontend files
+app.use(express.static(path.join(__dirname, "frontend")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend", "index.html"));
+});
 
 app.use("/api", chatRoutes);
 app.use("/api", biasRoutes);
