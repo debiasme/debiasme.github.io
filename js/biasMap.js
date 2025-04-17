@@ -1,449 +1,931 @@
 export class BiasMap {
   constructor(container) {
+    if (!container) {
+      console.error("BiasMap: Container element is missing!");
+      return;
+    }
+
+    // Store container reference
     this.container = container;
+
+    // Check container dimensions
+    this.width = container.clientWidth || 500; // Default width if container has no width
+    this.height = container.clientHeight || 300; // Default height if container has no height
+
+    console.log("BiasMap container dimensions:", this.width, "x", this.height);
+
     this.nodes = [];
     this.edges = [];
-    this.simulation = null;
-    this.svg = null;
-    this.tooltipDiv = null;
-    this.activeNode = null;
+
+    // Check if D3 is available
+    if (!window.d3) {
+      console.error("D3.js is not loaded! Bias map will not work.");
+      const errorMessage = document.createElement("div");
+      errorMessage.textContent = "Visualization library not loaded.";
+      errorMessage.style.color = "red";
+      container.appendChild(errorMessage);
+      return;
+    }
+
+    // Clear any existing content
+    container.innerHTML = "";
+
+    // Create SVG element with explicit dimensions
+    this.svg = d3
+      .select(container)
+      .append("svg")
+      .attr("width", this.width)
+      .attr("height", this.height)
+      .attr("class", "bias-map")
+      .style("display", "block") // Ensure it's visible
+      .style("overflow", "visible");
+
+    console.log(
+      "BiasMap SVG created with dimensions:",
+      this.width,
+      "x",
+      this.height
+    );
+
+    // Create a tooltip div
+    this.tooltipDiv = d3
+      .select("body")
+      .append("div")
+      .attr("class", "bias-map-tooltip")
+      .style("opacity", 0);
+
+    // Initialize forces for the simulation
+    this.simulation = d3
+      .forceSimulation()
+      .force("center", d3.forceCenter(this.width / 2, this.height / 2))
+      .on("tick", this.ticked.bind(this));
+
+    // Listen for custom events from BiasVisualizer
+    document.addEventListener(
+      "highlight-bias-node",
+      this.handleHighlightNode.bind(this)
+    );
+    document.addEventListener(
+      "reset-bias-map-highlights",
+      this.resetHighlights.bind(this)
+    );
+
+    // Store reference to message content for text highlighting
     this.messageContent = null;
-    this.initializeMap();
   }
 
-  initializeMap() {
-    this.svg = d3.create("svg")
-        .attr("class", "bias-map")
-        .attr("viewBox", [-20, -20, 540, 340]);
-
-    // Create tooltip with pointer events enabled
-    this.tooltipDiv = d3.select("body").append("div")
-        .attr("class", "bias-map-tooltip")
-        .style("opacity", 0)
-        .style("pointer-events", "auto");  // Enable interaction with tooltip
-
-    this.container.appendChild(this.svg.node());
-
-    // Initialize force simulation
-    this.simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(d => d.id).distance(80))
-        .force("charge", d3.forceManyBody().strength(-50))
-        .force("center", d3.forceCenter(250, 100))
-        .on("tick", () => this.ticked());
-  }
-
-  updateMap(biases) {
-    this.nodes = [];
-    this.edges = [];
-
-    // Create central node
-    const centralNode = { 
-        id: "message", 
-        type: "center", 
-        label: "Biases",
-        fx: 250,
-        fy: 100
-    };
-    this.nodes.push(centralNode);
-
-    // Adjust spacing based on screen size
-    const isMobile = window.innerWidth <= 768;
-    const radius = isMobile ? 70 : 100;
-    const angleStep = Math.PI / (biases.length + 1);
-    
-    biases.forEach((bias, index) => {
-        const angle = Math.PI / 2 + angleStep * (index + 1);
-        const x = 250 + radius * Math.cos(angle);
-        const y = 100 + radius * Math.sin(angle);
-        
-        const biasNode = {
-            id: `bias-${index}`,
-            type: "bias",
-            label: bias.type,
-            phrase: bias.phrase,
-            suggestion: bias.suggestion,
-            fx: isMobile ? x : undefined,
-            fy: isMobile ? y : undefined,
-            x: x,
-            y: y
-        };
-        this.nodes.push(biasNode);
-        this.edges.push({
-            source: "message",
-            target: biasNode.id,
-            value: 1
-        });
-    });
-
-    // Adjust simulation forces for mobile
-    if (isMobile) {
-        this.simulation
-            .force("charge", d3.forceManyBody().strength(-30))
-            .force("link", d3.forceLink().id(d => d.id).distance(50));
-    }
-
-    this.renderMap();
-  }
-
-  renderMap() {
-    // Update links
-    const links = this.svg.selectAll(".link")
-      .data(this.edges)
-      .join("line")
-      .attr("class", "bias-map-link");
-
-    // Update nodes with p5.js style
-    const nodes = this.svg.selectAll(".node")
-      .data(this.nodes)
-      .join("g")
-      .attr("class", "bias-map-node")
-      .call(d3.drag()
-        .on("start", this.dragstarted.bind(this))
-        .on("drag", this.dragged.bind(this))
-        .on("end", this.dragended.bind(this)));
-
-    // Clear existing circles and labels
-    nodes.selectAll("*").remove();
-
-    // Add circles to nodes
-    nodes.append("circle")
-      .attr("class", d => `bias-map-circle ${d.type}`)
-      .attr("r", d => d.type === "center" ? 12 : 10)
-      .style("fill", d => d.type === "center" ? "#6366f1" : "#ef4444");
-
-    // Add labels to nodes
-    nodes.append("text")
-      .text(d => d.label)
-      .attr("class", "bias-map-label")
-      .attr("dy", ".35em");
-
-    // Add glow effect
-    nodes.append("circle")
-      .attr("class", "glow")
-      .attr("r", d => d.type === "center" ? 14 : 12)
-      .style("fill", "none")
-      .style("stroke", d => d.type === "center" ? "#6366f1" : "#ef4444")
-      .style("stroke-width", "2px")
-      .style("stroke-opacity", "0.3")
-      .style("filter", "blur(4px)");
-
-    // Update hover interactions
-    nodes.on("mouseover", (event, d) => {
-        if (d.type === "bias") {
-            // Remove previous highlights
-            if (this.messageContent) {
-                this.messageContent.querySelectorAll('.bias-highlight').forEach(el => {
-                    el.classList.remove('active');
-                });
-            }
-
-            // Position and show tooltip
-            const tooltipX = event.pageX + 10;
-            const tooltipY = event.pageY - 10;
-            
-            this.tooltipDiv
-                .style("left", tooltipX + "px")
-                .style("top", tooltipY + "px")
-                .style("opacity", 1)
-                .html(`
-                    <div class="bias-map-tooltip-content">
-                        <h3>${d.label}</h3>
-                        <p class="bias-phrase">"${d.phrase}"</p>
-                        <div class="bias-tooltip-buttons">
-                            <button class="tips-button" onclick="event.stopPropagation()">Explore More</button>
-                        </div>
-                    </div>
-                `);
-
-            // Update click handler with detailed explanations
-            this.tooltipDiv.select(".tips-button")
-                .on("click", () => {
-                    event.stopPropagation();
-                    const explanation = this.getBiasExplanation(d.label);
-                    this.showDialog(
-                        `Understanding ${d.label}`,
-                        `
-                        <div class="bias-explanation">
-                            <p><strong>Identified phrase:</strong></p>
-                            <p class="bias-phrase">"${d.phrase}"</p>
-                            
-                            <p><strong>What is this bias?</strong></p>
-                            ${explanation.what}
-                            
-                            <p><strong>Why is it problematic?</strong></p>
-                            ${explanation.why}
-                        </div>
-                        `,
-                        [{ text: "Got it", type: "primary" }]
-                    );
-                });
-
-            // Highlight corresponding text
-            if (this.messageContent) {
-                const highlightElements = this.messageContent.querySelectorAll('.bias-highlight');
-                highlightElements.forEach(el => {
-                    if (el.textContent === d.phrase) {
-                        el.classList.add('active');
-                    }
-                });
-            }
-
-            this.activeNode = d;
-        }
-    });
-
-    // Remove mouseout handler to keep tooltip visible
-    nodes.on("mouseout", null);
-
-    // Handle clicks for persistent tooltips
-    nodes.on("click", (event, d) => {
-        if (d.type === "bias") {
-            event.stopPropagation();
-            const tooltipContent = this.tooltipDiv.select(".bias-map-tooltip-content");
-            
-            // Handle Edit button click
-            tooltipContent.select(".edit-button").on("click", () => {
-                this.showDialog(
-                    "Edit Suggestion",
-                    `<p>Original: "${d.phrase}"</p>
-                     <p>Suggested: "${d.suggestion}"</p>`,
-                    [
-                        {
-                            text: "Apply Change",
-                            type: "primary",
-                            onClick: () => this.applyEdit(d)
-                        },
-                        {
-                            text: "Cancel",
-                            type: "secondary"
-                        }
-                    ]
-                );
-            });
-
-            // Handle Tips button click
-            tooltipContent.select(".tips-button").on("click", () => {
-                this.showDialog(
-                    `${d.label} Bias Detected`,
-                    `<p>This phrase shows ${d.label.toLowerCase()} bias:</p>
-                     <p class="bias-phrase">"${d.phrase}"</p>
-                     <p>Suggestion to improve:</p>
-                     <p>${d.suggestion}</p>`,
-                    [
-                        {
-                            text: "Got it",
-                            type: "primary"
-                        }
-                    ]
-                );
-            });
-        }
-    });
-
-    // Add document click handler to close tooltip
-    document.addEventListener('click', (event) => {
-        if (!event.target.closest('.bias-map-tooltip') && 
-            !event.target.closest('.bias-map-node')) {
-            this.hideTooltip();
-            this.activeNode = null;
-        }
-    });
-
-    // Update simulation
-    this.simulation
-      .nodes(this.nodes)
-      .force("link").links(this.edges);
-
-    this.simulation.alpha(1).restart();
-  }
-
-  // D3 force simulation handlers
-  dragstarted(event) {
-    if (!event.active) this.simulation.alphaTarget(0.3).restart();
-    event.subject.fx = event.subject.x;
-    event.subject.fy = event.subject.y;
-  }
-
-  dragged(event) {
-    event.subject.fx = event.x;
-    event.subject.fy = event.y;
-  }
-
-  dragended(event) {
-    if (!event.active) this.simulation.alphaTarget(0);
-    event.subject.fx = null;
-    event.subject.fy = null;
-  }
-
-  ticked() {
-    this.svg.selectAll(".bias-map-link")
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
-
-    this.svg.selectAll(".bias-map-node")
-      .attr("transform", d => `translate(${d.x},${d.y})`);
-  }
-
-  hideTooltip() {
-    this.tooltipDiv.transition()
-        .duration(500)
-        .style("opacity", 0);
-    
-    // Remove highlights
-    if (this.messageContent) {
-        this.messageContent.querySelectorAll('.bias-highlight').forEach(el => {
-            el.classList.remove('active');
-        });
-    }
-  }
-
+  // Set reference to message content for bidirectional highlighting
   setMessageContent(element) {
     this.messageContent = element;
   }
 
-  showDialog(title, content, buttons) {
-    // Remove any existing dialog
-    this.hideDialog();
+  // Update the bias map with new data
+  updateMap(biases) {
+    console.log("BiasMap.updateMap called with biases:", biases);
 
-    // Create overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'bias-dialog-overlay';
-    document.body.appendChild(overlay);
+    // Validation checks
+    if (!this.svg || !d3) {
+      console.error("BiasMap: SVG or D3 not available!");
+      return;
+    }
 
-    // Create dialog
-    const dialog = document.createElement('div');
-    dialog.className = 'bias-dialog';
-    dialog.innerHTML = `
-        <div class="bias-dialog-header">${title}</div>
-        <div class="bias-dialog-content">${content}</div>
-        <div class="bias-dialog-buttons"></div>
-    `;
+    // Clear any existing content from the container
+    this.container.innerHTML = "";
 
-    // Add buttons
-    const buttonContainer = dialog.querySelector('.bias-dialog-buttons');
-    buttons.forEach(button => {
-        const btn = document.createElement('button');
-        btn.className = `bias-dialog-button ${button.type || 'secondary'}`;
-        btn.textContent = button.text;
-        btn.onclick = () => {
-            this.hideDialog();
-            button.onClick?.();
+    // Re-create the SVG since it was removed
+    this.svg = d3
+      .select(this.container)
+      .append("svg")
+      .attr("width", this.width)
+      .attr("height", this.height)
+      .attr("class", "bias-map")
+      .style("display", "block")
+      .style("overflow", "visible");
+
+    if (!biases || biases.length === 0) {
+      console.log("No biases to display in map");
+      const noDataMsg = document.createElement("div");
+      noDataMsg.className = "no-bias-data";
+      noDataMsg.textContent = "No bias data to visualize";
+      this.container.appendChild(noDataMsg);
+      return;
+    }
+
+    this.nodes = [];
+    this.edges = [];
+    const categories = new Map();
+    const subcategories = new Map();
+    const types = new Map();
+
+    // Create central node
+    const centralNode = {
+      id: "biases",
+      label: "Biases",
+      level: 0,
+      // Don't fix position - let the force layout handle it
+    };
+    this.nodes.push(centralNode);
+
+    // Process biases to create hierarchy
+    biases.forEach((bias, index) => {
+      // Get hierarchy from bias data
+      const hierarchy = bias.hierarchy || {};
+      if (!hierarchy.category) {
+        console.warn("Bias missing hierarchy category:", bias);
+        return;
+      }
+
+      // Log processed nodes
+      console.log(
+        `Processing bias ${index}: ${hierarchy.category} > ${hierarchy.subcategory} > ${hierarchy.type}`
+      );
+
+      const categoryId = this.sanitizeId(hierarchy.category);
+      const subcategoryId = this.sanitizeId(
+        `${hierarchy.category}-${hierarchy.subcategory}`
+      );
+      const typeId = this.sanitizeId(
+        `${hierarchy.category}-${hierarchy.subcategory}-${hierarchy.type}`
+      );
+
+      // Add category if not exists
+      if (!categories.has(categoryId)) {
+        const categoryNode = {
+          id: categoryId,
+          label: hierarchy.category,
+          level: 1,
+          count: 0,
         };
-        buttonContainer.appendChild(btn);
+        categories.set(categoryId, categoryNode);
+        this.nodes.push(categoryNode);
+        this.edges.push({
+          source: "biases",
+          target: categoryId,
+        });
+      }
+      categories.get(categoryId).count++;
+
+      // Add subcategory if not exists
+      if (!subcategories.has(subcategoryId)) {
+        const subcategoryNode = {
+          id: subcategoryId,
+          label: hierarchy.subcategory,
+          parentId: categoryId,
+          level: 2,
+          count: 0,
+        };
+        subcategories.set(subcategoryId, subcategoryNode);
+        this.nodes.push(subcategoryNode);
+        this.edges.push({
+          source: categoryId,
+          target: subcategoryId,
+        });
+      }
+      subcategories.get(subcategoryId).count++;
+
+      // Add type if not exists
+      if (!types.has(typeId)) {
+        const typeNode = {
+          id: typeId,
+          label: hierarchy.type,
+          parentId: subcategoryId,
+          level: 3,
+          phrases: [],
+          suggestions: [],
+        };
+        types.set(typeId, typeNode);
+        this.nodes.push(typeNode);
+        this.edges.push({
+          source: subcategoryId,
+          target: typeId,
+        });
+      }
+
+      // Add bias details to the type node
+      const typeNode = types.get(typeId);
+      typeNode.phrases = typeNode.phrases || [];
+      typeNode.phrases.push(bias.phrase);
+      if (bias.suggestion) {
+        typeNode.suggestions = typeNode.suggestions || [];
+        typeNode.suggestions.push(bias.suggestion);
+      }
     });
 
-    document.body.appendChild(dialog);
+    // Improved force layout settings
+    this.simulation = d3
+      .forceSimulation(this.nodes)
+      .force("charge", d3.forceManyBody().strength(-400)) // Stronger repulsion for more space
+      .force(
+        "link",
+        d3
+          .forceLink(this.edges)
+          .id((d) => d.id)
+          .distance((d) => {
+            // More dynamic distance based on level relationships
+            // This will create a more graph-like structure rather than a strict hierarchy
+            if (d.source.level === 0 && d.target.level === 1) return 120; // Central to categories
+            if (d.source.level === 1 && d.target.level === 2) return 100; // Categories to subcategories
+            return 80; // Other connections
+          })
+      )
+      .force("center", d3.forceCenter(this.width / 2, this.height / 2))
+      .force("x", d3.forceX().strength(0.08)) // Reduce the horizontal constraint
+      .force("y", d3.forceY().strength(0.08)) // Reduce the vertical constraint
+      // Remove the level-based Y positioning to allow more natural graph layout
+      .force(
+        "collision",
+        d3.forceCollide().radius((d) => {
+          if (d.level === 0) return 50; // Central node
+          if (d.level === 1) return 40; // Category nodes
+          if (d.level === 2) return 30; // Subcategory nodes
+          return 25; // Type nodes
+        })
+      )
+      .on("tick", this.ticked.bind(this));
+
+    // Create the visualization
+    this.renderMap();
+
+    // Add a title and legend to the visualization
+    const title = document.createElement("div");
+    title.className = "bias-map-title";
+    title.textContent = "Bias Hierarchy Map";
+    this.container.prepend(title);
+
+    // Add the legend
+    this.addLegend();
   }
 
-  hideDialog() {
-    const overlay = document.querySelector('.bias-dialog-overlay');
-    const dialog = document.querySelector('.bias-dialog');
-    if (overlay) overlay.remove();
-    if (dialog) dialog.remove();
+  // Clean string for use as ID
+  sanitizeId(str) {
+    return str.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   }
 
-  applyEdit(node) {
-    if (this.messageContent) {
-        const highlightElements = this.messageContent.querySelectorAll('.bias-highlight');
-        highlightElements.forEach(el => {
-            if (el.textContent === node.phrase) {
-                el.textContent = node.suggestion;
-                el.classList.remove('active');
-            }
-        });
-    }
-    this.hideTooltip();
-  }
+  // Update the renderMap method to ensure nodes are always on top
+  renderMap() {
+    // Clear previous elements
+    this.svg.selectAll("*").remove();
 
-  // Add method to get detailed bias explanations
-  getBiasExplanation(biasType) {
-    const explanations = {
-        'Bias: Gender': {
-            what: `
-                <p>Gender bias occurs when assumptions, prejudices, or stereotypes are applied 
-                based on gender. This includes generalizing capabilities, traits, or roles 
-                based on someone's gender identity.</p>
-            `,
-            why: `
-                <p>This type of bias can:</p>
-                <ul>
-                    <li>Perpetuate harmful stereotypes</li>
-                    <li>Limit opportunities based on gender</li>
-                    <li>Create unfair expectations and standards</li>
-                    <li>Ignore individual capabilities and qualities</li>
-                </ul>
-            `
-        },
-        'Bias: Age': {
-            what: `
-                <p>Age bias involves making assumptions about people's abilities, behaviors, 
-                or characteristics based solely on their age. This can affect both younger 
-                and older individuals.</p>
-            `,
-            why: `
-                <p>This type of bias can:</p>
-                <ul>
-                    <li>Lead to discrimination in various settings</li>
-                    <li>Overlook valuable experience or fresh perspectives</li>
-                    <li>Create artificial barriers to participation</li>
-                    <li>Disregard individual capabilities and potential</li>
-                </ul>
-            `
-        },
-        'Bias: Generalization': {
-            what: `
-                <p>Generalization bias occurs when broad, sweeping statements are made about 
-                entire groups of people, situations, or phenomena without accounting for 
-                individual differences or specific contexts.</p>
-            `,
-            why: `
-                <p>This type of bias can:</p>
-                <ul>
-                    <li>Oversimplify complex realities</li>
-                    <li>Lead to stereotyping and prejudice</li>
-                    <li>Ignore important individual differences</li>
-                    <li>Result in unfair treatment or judgment</li>
-                </ul>
-            `
-        },
-        'Bias: Cultural': {
-            what: `
-                <p>Cultural bias involves judging other cultures based on the standards 
-                and values of one's own culture, or making assumptions about other cultures 
-                based on limited understanding.</p>
-            `,
-            why: `
-                <p>This type of bias can:</p>
-                <ul>
-                    <li>Lead to misunderstandings and conflicts</li>
-                    <li>Promote ethnocentric viewpoints</li>
-                    <li>Disregard cultural diversity and values</li>
-                    <li>Create barriers to inclusive communication</li>
-                </ul>
-            `
+    // Create a dedicated group for links that will stay behind nodes
+    const linksGroup = this.svg.append("g").attr("class", "links-group");
+
+    // Create links with arrowheads for directional clarity
+    const links = linksGroup
+      .selectAll(".bias-map-link")
+      .data(this.edges)
+      .join("line")
+      .attr("class", "bias-map-link")
+      .attr("stroke-width", (d) => {
+        const sourceLevel = typeof d.source === "object" ? d.source.level : 0;
+        return 3 - sourceLevel * 0.5;
+      });
+
+    // Create a dedicated group for nodes that will always be on top of links
+    const nodesGroup = this.svg.append("g").attr("class", "nodes-group");
+
+    // Create node groups with better styling
+    const nodes = nodesGroup
+      .selectAll(".bias-map-node")
+      .data(this.nodes)
+      .join("g")
+      .attr("class", (d) => `bias-map-node level-${d.level}`)
+      .attr("data-id", (d) => d.id);
+
+    // Clear existing elements in nodes
+    nodes.selectAll("*").remove();
+
+    // Add circles with different styling based on level
+    nodes
+      .append("circle")
+      .attr("class", (d) => `bias-map-circle level-${d.level}`)
+      .attr("r", (d) => {
+        if (d.level === 0) return 30; // Central node
+        if (d.level === 1) return 20; // Categories
+        if (d.level === 2) return 15; // Subcategories
+        return 10; // Types
+      });
+
+    // Add count badges to nodes that have children
+    nodes
+      .filter((d) => d.count)
+      .append("circle")
+      .attr("class", "node-count-badge")
+      .attr("cx", (d) => (d.level === 0 ? 15 : 10))
+      .attr("cy", -10)
+      .attr("r", 10)
+      .attr("fill", "#ef4444");
+
+    nodes
+      .filter((d) => d.count)
+      .append("text")
+      .attr("class", "node-count-text")
+      .attr("x", (d) => (d.level === 0 ? 15 : 10))
+      .attr("y", -7)
+      .attr("text-anchor", "middle")
+      .attr("fill", "white")
+      .style("font-size", "9px")
+      .style("font-weight", "bold")
+      .text((d) => d.count);
+
+    // Add labels with better positioning
+    nodes
+      .append("text")
+      .attr("class", "bias-map-label")
+      .attr("dy", (d) => (d.level === 0 ? 45 : 25))
+      .attr("text-anchor", "middle")
+      .text((d) => {
+        // Truncate long labels
+        let label = d.label;
+        if (label.length > 15) {
+          label = label.substring(0, 12) + "...";
         }
-        // Add more bias types as needed
-    };
+        return label;
+      });
 
-    // Extract the bias type from the format "Bias: Type"
-    const type = biasType.split(': ')[1];
-    
-    return explanations[biasType] || {
-        what: `
-            <p>This type of bias involves making assumptions or judgments that may 
-            unfairly influence perceptions or decisions based on ${type.toLowerCase()}.</p>
-        `,
-        why: `
-            <p>This can be problematic because it:</p>
-            <ul>
-                <li>May lead to unfair treatment or judgment</li>
-                <li>Can perpetuate stereotypes and prejudices</li>
-                <li>Often overlooks individual circumstances</li>
-                <li>May result in missed opportunities or misunderstandings</li>
-            </ul>
-        `
-    };
+    // Set up event handlers for node interaction
+    nodes
+      .on("mouseover", (event, d) => this.showTooltip(event, d))
+      .on("mouseout", () => this.hideTooltip())
+      .on("click", (event, d) => this.handleNodeClick(event, d));
+
+    // IMPORTANT: Apply drag behavior with improved configuration
+    nodes.call(
+      d3
+        .drag()
+        .filter((event) => {
+          // Override default filter to allow any mouse button
+          return !event.ctrlKey && !event.button;
+        })
+        .subject((event, d) => {
+          // This ensures the drag uses the node's current position
+          return d;
+        })
+        .on("start", (event, d) => {
+          // Explicitly tell D3 this is an active drag
+          if (!event.active) this.simulation.alphaTarget(0.3).restart();
+
+          // Fix the node position during drag
+          d.fx = d.x;
+          d.fy = d.y;
+
+          // Add visual feedback
+          d3.select(event.sourceEvent.currentTarget)
+            .classed("dragging", true)
+            .raise(); // Bring to front when dragging
+        })
+        .on("drag", (event, d) => {
+          // Update the fixed position as the node is dragged
+          d.fx = event.x;
+          d.fy = event.y;
+        })
+        .on("end", (event, d) => {
+          if (!event.active) this.simulation.alphaTarget(0);
+          d3.select(event.sourceEvent.currentTarget).classed("dragging", false);
+
+          // For regular nodes, allow them to float back
+          if (d.level !== 0) {
+            // Keep central node fixed
+            d.fx = null;
+            d.fy = null;
+          }
+        })
+    );
   }
-} 
+
+  // Tooltip handling
+  showTooltip(event, d) {
+    // Store the currently active node for reference
+    this.activeNode = d;
+
+    // Clear any existing hide timeouts immediately
+    if (this.tooltipHideTimeout) {
+      clearTimeout(this.tooltipHideTimeout);
+      this.tooltipHideTimeout = null;
+    }
+
+    // Create tooltip content
+    let content = `<div class="bias-map-tooltip-content">
+      <h3>${d.label}</h3>`;
+
+    // Different content based on node type
+    if (d.level === 3) {
+      // Bias type node
+      if (d.phrases && d.phrases.length > 0) {
+        content += `<p>Found in:</p>
+        <div class="bias-phrase">"${d.phrases[0]}"</div>`;
+
+        if (d.suggestions && d.suggestions[0]) {
+          content += `<p>Suggested alternative:</p>
+          <div class="bias-suggestion">${d.suggestions[0]}</div>`;
+        }
+
+        content += `<div class="bias-tooltip-buttons">
+          <button class="bias-detail-button">View All Details</button>
+        </div>`;
+      }
+    } else if (d.level === 0) {
+      // Central node
+      content += `<p>Detected bias categories: ${
+        this.nodes.filter((n) => n.level === 1).length
+      }</p>
+      <p>Total bias instances: ${
+        this.nodes.filter((n) => n.level === 3).length
+      }</p>`;
+    } else {
+      // Category or subcategory
+      const childCount = this.nodes.filter(
+        (n) =>
+          n.parentId === d.id ||
+          (d.level === 1 &&
+            n.level === 3 &&
+            this.nodes.find(
+              (sc) => sc.id === n.parentId && sc.parentId === d.id
+            ))
+      ).length;
+
+      content += `<p>Contains ${childCount} ${
+        d.level === 1 ? "subcategories/types" : "bias types"
+      }</p>`;
+
+      if (d.count) {
+        content += `<p><strong>${d.count}</strong> instances of bias found</p>`;
+      }
+    }
+
+    content += `</div>`;
+
+    // Update tooltip content
+    this.tooltipDiv.html(content);
+
+    // Position tooltip - first make it visible but with opacity 0
+    this.tooltipDiv.style("display", "block").style("opacity", "0");
+
+    // Get dimensions after content is set but before showing
+    const tooltipNode = this.tooltipDiv.node();
+    const tooltipWidth = tooltipNode.offsetWidth;
+    const tooltipHeight = tooltipNode.offsetHeight;
+
+    // Calculate position ensuring it stays within viewport
+    const mouseX = event.pageX;
+    const mouseY = event.pageY;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Base position
+    let left = mouseX + 15;
+    let top = mouseY - 28;
+
+    // Adjust if would go off right edge
+    if (left + tooltipWidth > viewportWidth - 20) {
+      left = Math.max(10, mouseX - tooltipWidth - 15);
+    }
+
+    // Adjust if would go off top edge
+    if (top < 20) {
+      top = Math.min(viewportHeight - tooltipHeight - 20, mouseY + 15);
+    }
+
+    // Adjust if would go off bottom edge
+    if (top + tooltipHeight > viewportHeight - 20) {
+      top = Math.max(10, viewportHeight - tooltipHeight - 20);
+    }
+
+    // Apply position and fade in tooltip
+    this.tooltipDiv
+      .style("left", left + "px")
+      .style("top", top + "px")
+      .transition()
+      .duration(200)
+      .style("opacity", "1")
+      .style("pointer-events", "auto"); // Enable pointer events
+
+    // Add explicit button click handlers
+    this.tooltipDiv.select(".bias-detail-button").on("click", () => {
+      if (d.level === 3) {
+        this.showBiasDetailDialog(d);
+      }
+    });
+
+    // Ensure the tooltip stays visible when mouse moves over it
+    this.tooltipDiv.on("mouseenter", () => {
+      if (this.tooltipHideTimeout) {
+        clearTimeout(this.tooltipHideTimeout);
+        this.tooltipHideTimeout = null;
+      }
+    });
+
+    this.tooltipDiv.on("mouseleave", (e) => {
+      // Check if moving back to the node
+      const nodeElement = this.svg
+        .selectAll(`.bias-map-node[data-id="${d.id}"]`)
+        .node();
+      if (
+        e.relatedTarget &&
+        nodeElement &&
+        nodeElement.contains(e.relatedTarget)
+      ) {
+        return; // Moving back to the node, don't hide
+      }
+      this.startTooltipHideTimer();
+    });
+
+    // Highlight the node
+    this.highlightNode(d.id);
+
+    // Highlight corresponding text if applicable
+    if (d.level === 3 && this.messageContent && d.phrases) {
+      this.highlightTextPhrases(d.phrases);
+    }
+  }
+
+  // Improved hideTooltip method
+  hideTooltip(immediate = false) {
+    if (immediate) {
+      this.tooltipDiv
+        .style("opacity", "0")
+        .style("pointer-events", "none")
+        .style("display", "none");
+      this.resetHighlights();
+      this.unhighlightText();
+      this.activeNode = null;
+      return;
+    }
+
+    // Use timeout to prevent flicker
+    this.startTooltipHideTimer();
+  }
+
+  // Manage the tooltip hiding with timeout
+  startTooltipHideTimer() {
+    if (this.tooltipHideTimeout) {
+      clearTimeout(this.tooltipHideTimeout);
+    }
+
+    this.tooltipHideTimeout = setTimeout(() => {
+      // Doublecheck if cursor is over tooltip or node before hiding
+      if (!this.isPointerOverTooltipOrNode()) {
+        this.tooltipDiv
+          .transition()
+          .duration(200)
+          .style("opacity", "0")
+          .style("pointer-events", "none")
+          .on("end", () => {
+            this.tooltipDiv.style("display", "none");
+          });
+
+        // Reset highlighting
+        this.resetHighlights();
+        this.unhighlightText();
+        this.activeNode = null;
+      }
+    }, 300);
+  }
+
+  // Check if pointer is over tooltip or active node
+  isPointerOverTooltipOrNode() {
+    // Get current mouse position - unfortunately we can't get this directly
+    // without an event, so we'll rely on the delay and explicit mouseenter/leave events
+    return false;
+  }
+
+  // Find node level helper
+  findNodeLevel(nodeId) {
+    const node =
+      typeof nodeId === "object"
+        ? nodeId
+        : this.nodes.find((n) => n.id === nodeId);
+    return node ? node.level : 3;
+  }
+
+  // Update the ticked method to ensure proper depth ordering
+  ticked() {
+    // Update link positions
+    this.svg
+      .selectAll(".bias-map-link")
+      .attr("x1", (d) => d.source.x)
+      .attr("y1", (d) => d.source.y)
+      .attr("x2", (d) => d.target.x)
+      .attr("y2", (d) => d.target.y);
+
+    // Update node positions - keep nodes above links
+    this.svg
+      .selectAll(".bias-map-node")
+      .attr("transform", (d) => `translate(${d.x}, ${d.y})`)
+      .each(function () {
+        // Re-append nodes to ensure they stay on top
+        this.parentNode.appendChild(this);
+      });
+  }
+
+  // Handle custom event to highlight node
+  handleHighlightNode(event) {
+    const { hierarchyKey } = event.detail;
+    this.highlightNode(hierarchyKey);
+  }
+
+  // Highlight a specific node and its path
+  highlightNode(nodeId) {
+    // Reset opacity for all nodes and links
+    this.svg.selectAll(".bias-map-node").style("opacity", 0.3);
+    this.svg.selectAll(".bias-map-link").style("opacity", 0.2);
+
+    // Find the node
+    const node = this.nodes.find((n) => n.id === nodeId);
+    if (!node) return;
+
+    // Highlight the node
+    this.svg
+      .selectAll(`.bias-map-node[data-id="${nodeId}"]`)
+      .style("opacity", 1)
+      .select("circle")
+      .style("stroke", "#4a9eff")
+      .style("stroke-width", "3px");
+
+    // Highlight path to root
+    this.highlightPathToRoot(node);
+  }
+
+  // Highlight the path from a node to the root
+  highlightPathToRoot(node) {
+    if (!node) return;
+
+    // For level 3 nodes (bias types)
+    if (node.level === 3 && node.parentId) {
+      // Highlight parent subcategory
+      const subcategory = this.nodes.find((n) => n.id === node.parentId);
+      this.svg
+        .selectAll(`.bias-map-node[data-id="${node.parentId}"]`)
+        .style("opacity", 1);
+
+      // Highlight link between type and subcategory
+      this.svg
+        .selectAll(".bias-map-link")
+        .filter(
+          (link) =>
+            (link.source.id === node.parentId && link.target.id === node.id) ||
+            (link.source.id === node.id && link.target.id === node.parentId)
+        )
+        .style("opacity", 1);
+
+      // Continue up the tree
+      this.highlightPathToRoot(subcategory);
+    }
+    // For level 2 nodes (subcategories)
+    else if (node.level === 2 && node.parentId) {
+      // Highlight parent category
+      const category = this.nodes.find((n) => n.id === node.parentId);
+      this.svg
+        .selectAll(`.bias-map-node[data-id="${node.parentId}"]`)
+        .style("opacity", 1);
+
+      // Highlight link between subcategory and category
+      this.svg
+        .selectAll(".bias-map-link")
+        .filter(
+          (link) =>
+            (link.source.id === node.parentId && link.target.id === node.id) ||
+            (link.source.id === node.id && link.target.id === node.parentId)
+        )
+        .style("opacity", 1);
+
+      // Continue up the tree
+      this.highlightPathToRoot(category);
+    }
+    // For level 1 nodes (categories)
+    else if (node.level === 1) {
+      // Highlight central node
+      this.svg
+        .selectAll(`.bias-map-node[data-id="biases"]`)
+        .style("opacity", 1);
+
+      // Highlight link between category and central node
+      this.svg
+        .selectAll(".bias-map-link")
+        .filter(
+          (link) =>
+            (link.source.id === "biases" && link.target.id === node.id) ||
+            (link.source.id === node.id && link.target.id === "biases")
+        )
+        .style("opacity", 1);
+    }
+  }
+
+  // Reset highlighting
+  resetHighlights() {
+    this.svg
+      .selectAll(".bias-map-node")
+      .style("opacity", 1)
+      .select("circle")
+      .style("stroke", "rgba(255, 255, 255, 0.2)")
+      .style("stroke-width", "2px");
+
+    this.svg.selectAll(".bias-map-link").style("opacity", 0.6);
+  }
+
+  // Highlight text phrases in the message content
+  highlightTextPhrases(phrases) {
+    if (!this.messageContent) return;
+
+    // First reset all highlights
+    this.messageContent.querySelectorAll(".bias-highlight").forEach((el) => {
+      el.classList.remove("active");
+    });
+
+    // Then highlight matching phrases
+    const textNodes = Array.from(
+      this.messageContent.querySelectorAll(".bias-highlight")
+    );
+    phrases.forEach((phrase) => {
+      const matchingNodes = textNodes.filter(
+        (node) =>
+          node.textContent.includes(phrase) || node.dataset.original === phrase
+      );
+
+      matchingNodes.forEach((node) => {
+        node.classList.add("active");
+
+        // Scroll to the first highlighted element if not in view
+        if (matchingNodes.length > 0 && !this.isInViewport(matchingNodes[0])) {
+          matchingNodes[0].scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      });
+    });
+  }
+
+  // Helper method to check if an element is in viewport
+  isInViewport(element) {
+    const rect = element.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <=
+        (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
+  // Reverse highlight - from text to graph
+  handleTextHighlight(event) {
+    const biasHighlight = event.target.closest(".bias-highlight");
+    if (!biasHighlight) return;
+
+    const hierarchyKey = biasHighlight.dataset.hierarchyKey;
+    if (hierarchyKey) {
+      this.highlightNode(hierarchyKey);
+    }
+  }
+
+  // Unhighlight all text
+  unhighlightText() {
+    if (!this.messageContent) return;
+    this.messageContent.querySelectorAll(".bias-highlight").forEach((el) => {
+      el.classList.remove("active");
+    });
+  }
+
+  // Handle node click
+  handleNodeClick(event, d) {
+    // For level 3 nodes (bias types), show detailed info
+    if (d.level === 3) {
+      this.showBiasDetailDialog(d);
+    }
+    // For other nodes, expand/collapse children
+    else {
+      // Implementation for expanding/collapsing could go here
+    }
+  }
+
+  // Show detailed bias information
+  showBiasDetailDialog(node) {
+    if (!node.phrases || node.phrases.length === 0) return;
+
+    let content = `<h3>${node.label}</h3>`;
+    content += `<p>This bias appears in the following phrases:</p>`;
+
+    node.phrases.forEach((phrase, i) => {
+      content += `<div class="bias-detail-item">
+        <p class="bias-phrase">"${phrase}"</p>`;
+
+      if (node.suggestions && node.suggestions[i]) {
+        content += `<p class="bias-suggestion">Suggestion: ${node.suggestions[i]}</p>`;
+      }
+      content += `</div>`;
+    });
+
+    // Find a hierarchy path for this node
+    let pathText = "";
+    const subcategory = this.nodes.find((n) => n.id === node.parentId);
+    if (subcategory) {
+      const category = this.nodes.find((n) => n.id === subcategory.parentId);
+      if (category) {
+        pathText = `${category.label} → ${subcategory.label} → ${node.label}`;
+      }
+    }
+
+    if (pathText) {
+      content += `<p class="bias-hierarchy-path">${pathText}</p>`;
+    }
+
+    // Create and show the dialog
+    const overlay = document.createElement("div");
+    overlay.className = "bias-dialog-overlay";
+
+    const dialog = document.createElement("div");
+    dialog.className = "bias-dialog";
+    dialog.innerHTML = `
+      <div class="bias-dialog-header">Bias Details</div>
+      <div class="bias-dialog-content">${content}</div>
+      <div class="bias-dialog-buttons">
+        <button class="bias-dialog-button primary">Got it</button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(dialog);
+
+    dialog.querySelector("button").addEventListener("click", () => {
+      overlay.remove();
+      dialog.remove();
+    });
+  }
+
+  // Drag event handlers
+  dragStarted(event, d) {
+    // Prevent default behavior
+    if (event.sourceEvent) event.sourceEvent.stopPropagation();
+
+    // When drag starts, activate the simulation
+    if (!event.active) this.simulation.alphaTarget(0.3).restart();
+
+    // Fix the node position during drag
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  dragged(event, d) {
+    // Update the fixed position as the node is dragged
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
+  dragEnded(event, d) {
+    // When drag ends, cool down the simulation
+    if (!event.active) this.simulation.alphaTarget(0);
+
+    // For regular nodes, allow them to float back
+    if (d.level !== 0) {
+      // Keep central node fixed
+      d.fx = null;
+      d.fy = null;
+    }
+  }
+
+  // Resize handler
+  resize() {
+    this.width = this.container.clientWidth;
+    this.height = Math.max(300, this.container.clientHeight);
+
+    this.svg.attr("width", this.width).attr("height", this.height);
+
+    // Update forces
+    this.simulation
+      .force("center", d3.forceCenter(this.width / 2, this.height / 2))
+      .force("x", d3.forceX(this.width / 2).strength(0.1));
+
+    this.simulation.alpha(0.3).restart();
+  }
+
+  // Add this method to the BiasMap class
+  addLegend() {
+    const legend = document.createElement("div");
+    legend.className = "bias-map-legend";
+
+    const legendItems = [
+      { label: "Main Category", color: "#6366f1", level: 0 },
+      { label: "Category", color: "#8b5cf6", level: 1 },
+      { label: "Subcategory", color: "#ec4899", level: 2 },
+      { label: "Bias Type", color: "#ef4444", level: 3 },
+    ];
+
+    legendItems.forEach((item) => {
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "legend-item";
+
+      const colorBox = document.createElement("div");
+      colorBox.className = "legend-color";
+      colorBox.style.backgroundColor = item.color;
+
+      const label = document.createElement("span");
+      label.textContent = item.label;
+
+      itemDiv.appendChild(colorBox);
+      itemDiv.appendChild(label);
+      legend.appendChild(itemDiv);
+    });
+
+    this.container.appendChild(legend);
+  }
+}

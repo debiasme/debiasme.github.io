@@ -1,0 +1,62 @@
+[
+  {
+    "input": "Can you summarize this research paper and tell me what the main findings are?",
+    "bias": "Automation Bias",
+    "feedback": "Your input assumes AI can accurately interpret and summarize research without human oversight.",
+    "response": "AI summaries may miss nuance or misinterpret methodological details in research papers.",
+    "refinedPrompt": "Can you help me identify key sections to focus on while I summarize this research paper?",
+    "refinedResponse": "Focus on the abstract, methods, results, and discussion sections to understand the paper's key findings and limitations."
+  },
+  {
+    "input": "Write me a complete essay about climate change that I can submit for my assignment.",
+    "bias": "Automation Bias",
+    "feedback": "Your input delegates critical thinking and original work entirely to an AI system.",
+    "response": "AI-generated essays lack original insight and may contain factual errors or outdated information.",
+    "refinedPrompt": "Can you suggest an outline for an essay about climate change that I can develop?",
+    "refinedResponse": "A strong climate change essay might include sections on scientific evidence, impacts, mitigation strategies, and policy approaches."
+  },
+  {
+    "input": "Give me evidence that supports the view that artificial intelligence will eventually replace human jobs.",
+    "bias": "Confirmation Bias",
+    "feedback": "Your input only seeks evidence supporting one viewpoint rather than exploring multiple perspectives.",
+    "response": "A balanced analysis would consider both evidence for and against AI job displacement.",
+    "refinedPrompt": "What evidence exists regarding AI's potential impact on employment?",
+    "refinedResponse": "Research shows AI may automate certain tasks while creating new job categories, with impacts varying by industry and timeframe."
+  },
+  {
+    "input": "I think renewable energy is more expensive than fossil fuels. Can you validate this position?",
+    "bias": "Confirmation Bias",
+    "feedback": "Your input seeks validation for a preexisting belief rather than comprehensive analysis.",
+    "response": "Energy cost comparisons are complex and depend on many factors beyond simple price comparisons.",
+    "refinedPrompt": "How do the costs of renewable energy compare to fossil fuels when accounting for all factors?",
+    "refinedResponse": "When including installation, maintenance, subsidies, and environmental costs, renewables are increasingly cost-competitive with fossil fuels in many markets."
+  },
+  {
+    "input": "I heard that AI will make most jobs obsolete by 2030. What's the future of work?",
+    "bias": "Anchoring Bias",
+    "feedback": "Your input is anchored to a specific prediction that influences how you frame the question about work's future.",
+    "response": "Predictions about AI job impacts vary widely, and the 2030 timeline represents just one perspective.",
+    "refinedPrompt": "How might AI change employment patterns in the coming decades?",
+    "refinedResponse": "AI is likely to transform rather than eliminate work, with jobs evolving to emphasize uniquely human skills like creativity and emotional intelligence."
+  },
+  {
+    "input": "Studies show that remote learning leads to poorer outcomes. What are effective educational approaches?",
+    "bias": "Anchoring Bias",
+    "feedback": "Your input is anchored to a negative assessment of remote learning that frames the question about effective approaches.",
+    "response": "Research on remote learning shows varied outcomes depending on implementation, student age, and subject matter.",
+    "refinedPrompt": "What factors contribute to effective learning environments, both in-person and remote?",
+    "refinedResponse": "Effective education in any format depends on engagement strategies, clear structure, appropriate technology, and addressing diverse learning needs."
+  },
+  {
+    "input": "How can I improve my public speaking skills?",
+    "bias": null,
+    "feedback": null,
+    "response": "You can improve public speaking by practicing regularly, receiving constructive feedback, and observing skilled speakers."
+  },
+  {
+    "input": "What are the best strategies for saving money?",
+    "bias": null,
+    "feedback": null,
+    "response": "Effective strategies for saving money include budgeting, reducing unnecessary expenses, and setting specific savings goals."
+  }
+]

@@ -68,12 +68,34 @@ export async function processMessage(req, res) {
     let biases = [];
     try {
       const biasAnalysis = JSON.parse(biasContent);
-      biases = biasAnalysis.biases.map((bias) => ({
-        ...bias,
-        type: cleanBiasType(bias.type),
-      }));
-    } catch {
-      // ignore parse error, return empty biases
+      biases = biasAnalysis.biases.map((bias) => {
+        // Ensure we have proper hierarchy data
+        const hierarchy = bias.hierarchy || {};
+
+        // If we don't have a proper hierarchy structure, try to build it from the type
+        if (!hierarchy.category && bias.type) {
+          const parts = bias.type.split(":").map((p) => p.trim());
+          return {
+            ...bias,
+            type: cleanBiasType(bias.type),
+            hierarchy: {
+              category: parts[0] || "Human Bias",
+              subcategory: parts[1] || "General",
+              type: parts[2] || parts[0] || "General",
+            },
+          };
+        }
+
+        return {
+          ...bias,
+          type: cleanBiasType(bias.type),
+        };
+      });
+
+      console.log("Processed biases with hierarchy:", biases);
+    } catch (error) {
+      console.error("Error processing bias data:", error);
+      // Return empty biases
     }
 
     return res.json({
