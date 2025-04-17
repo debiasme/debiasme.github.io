@@ -71,7 +71,7 @@ body {
 }
 
 .user-message .message-content {
-  background-color: #3b82f6;
+  background-color: #4477aa; /* Tol blue - replacing #3b82f6 */
   color: white;
   animation: slide-in-right 0.3s ease-out;
 }
@@ -85,8 +85,8 @@ body {
 }
 
 .ai-message .message-content {
-  background-color: #6366f1;
-  color: white;
+  background-color: #66ccee; /* Tol cyan - replacing #6366f1 */
+  color: #111827; /* Dark text for better contrast on light background */
   animation: slide-in 0.3s ease-out;
   width: fit-content;
   min-width: 200px;
@@ -253,11 +253,11 @@ body {
 /* Add these styles back */
 /* Button Styles */
 .bias-checker-enabled {
-  background-color: #8b5cf6;
+  background-color: #aa3377; /* Tol purple - replacing #8b5cf6 */
 }
 
 .bias-checker-disabled {
-  background-color: #ec4899;
+  background-color: #ee6677; /* Tol red - replacing #ec4899 */
 }
 
 .choice-buttons {
@@ -318,7 +318,7 @@ body {
 }
 
 #send-button {
-  background-color: #3b82f6;
+  background-color: #4477aa; /* Tol blue - replacing #3b82f6 */
   transition: transform 0.2s;
 }
 
@@ -599,7 +599,7 @@ body {
 }
 
 #detect-bias-button {
-  background-color: #8b5cf6;
+  background-color: #aa3377; /* Tol purple - replacing #8b5cf6 */
   color: white;
   padding: 8px 16px;
   border: none;
@@ -780,6 +780,32 @@ body {
   stroke-width: 2px;
   transition: all 0.3s ease;
   pointer-events: all !important;
+}
+
+/* Update the bias map node circle colors with Tol palette */
+
+/* Main Category node (center node) */
+.bias-map-circle.level-0 {
+  fill: #4477aa; /* Tol blue - replacing #6366f1 */
+  filter: drop-shadow(0 0 8px rgba(68, 119, 170, 0.5));
+}
+
+/* Category nodes */
+.bias-map-circle.level-1 {
+  fill: #66ccee; /* Tol cyan - replacing #8b5cf6 */
+  filter: drop-shadow(0 0 5px rgba(102, 204, 238, 0.5));
+}
+
+/* Subcategory nodes */
+.bias-map-circle.level-2 {
+  fill: #ccbb44; /* Tol yellow - replacing #ec4899 */
+  filter: drop-shadow(0 0 5px rgba(204, 187, 68, 0.5));
+}
+
+/* Type nodes - red is fine from Tol palette but needs to be adjusted */
+.bias-map-circle.level-3 {
+  fill: #ee6677; /* Tol red - replacing #ef4444 */
+  filter: drop-shadow(0 0 5px rgba(238, 102, 119, 0.5));
 }
 
 .bias-map-tooltip {

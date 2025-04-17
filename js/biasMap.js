@@ -898,16 +898,16 @@ export class BiasMap {
     this.simulation.alpha(0.3).restart();
   }
 
-  // Add this method to the BiasMap class
+  // Update the addLegend method to use the Tol palette colors
   addLegend() {
     const legend = document.createElement("div");
     legend.className = "bias-map-legend";
 
     const legendItems = [
-      { label: "Main Category", color: "#6366f1", level: 0 },
-      { label: "Category", color: "#8b5cf6", level: 1 },
-      { label: "Subcategory", color: "#ec4899", level: 2 },
-      { label: "Bias Type", color: "#ef4444", level: 3 },
+      { label: "Main Category", color: "#4477AA", level: 0 } /* Tol blue */,
+      { label: "Category", color: "#66CCEE", level: 1 } /* Tol cyan */,
+      { label: "Subcategory", color: "#CCBB44", level: 2 } /* Tol yellow */,
+      { label: "Bias Type", color: "#EE6677", level: 3 } /* Tol red */,
     ];
 
     legendItems.forEach((item) => {
