@@ -5,18 +5,12 @@ import { biasChecker } from "./biasChecker.js";
 import { environment } from "./environment.js";
 import { UserGuide } from "./userGuide.js";
 
-// Global variable to track Azure API usage
-let useAzure = false; // Initialize useAzure flag
-let biasCheckerEnabled = true;
-
 // Initialize the application
 async function initializeApp() {
   try {
-    // Load scenarios with path handling for GitHub Pages
-    const basePath =
-      window.location.hostname === "cmlmanni.github.io"
-        ? "/AyeEye/frontend"
-        : "frontend";
+    // Initialize bias checker state to enabled by default
+    stateManager.setState("biasCheckerEnabled", true);
+
     const response = await fetch(`/scenarios.json`);
 
     if (!response.ok) {
@@ -28,9 +22,32 @@ async function initializeApp() {
 
     // Set up event listeners
     setupEventListeners();
+
+    // Initialize UI states to match the default bias checker state
+    initializeUIStates();
   } catch (error) {
     console.error("Failed to initialize app:", error);
     stateManager.setState("error", "Failed to initialize application");
+  }
+}
+
+// New function to initialize UI states based on the state manager
+function initializeUIStates() {
+  const toggleButton = document.getElementById("toggle-bias-checker");
+  const detectBiasButton = document.getElementById("detect-bias-button");
+
+  if (stateManager.getState("biasCheckerEnabled")) {
+    toggleButton.textContent = "Disable Bias Checker";
+    toggleButton.classList.add("bias-checker-enabled");
+    toggleButton.classList.remove("bias-checker-disabled");
+    detectBiasButton.disabled = false;
+    detectBiasButton.style.opacity = "1";
+  } else {
+    toggleButton.textContent = "Enable Bias Checker";
+    toggleButton.classList.remove("bias-checker-enabled");
+    toggleButton.classList.add("bias-checker-disabled");
+    detectBiasButton.disabled = true;
+    detectBiasButton.style.opacity = "0.7";
   }
 }
 
@@ -41,7 +58,6 @@ function setupEventListeners() {
     .addEventListener("change", function () {
       const userInput = document.getElementById("user-input");
       userInput.value = this.value;
-      // userInput.disabled = !!this.value;
     });
 
   // Send button
@@ -53,11 +69,14 @@ function setupEventListeners() {
   document
     .getElementById("toggle-bias-checker")
     .addEventListener("click", () => {
-      biasCheckerEnabled = !biasCheckerEnabled;
+      // Toggle the state in the state manager
+      const currentState = stateManager.getState("biasCheckerEnabled");
+      stateManager.setState("biasCheckerEnabled", !currentState);
+
       const toggleButton = document.getElementById("toggle-bias-checker");
       const detectBiasButton = document.getElementById("detect-bias-button");
 
-      if (biasCheckerEnabled) {
+      if (stateManager.getState("biasCheckerEnabled")) {
         toggleButton.textContent = "Disable Bias Checker";
         toggleButton.classList.add("bias-checker-enabled");
         toggleButton.classList.remove("bias-checker-disabled");
@@ -101,6 +120,15 @@ function createThinkingAnimation(type = "bias") {
       "Building interactive visualization map",
       "Almost there",
     ];
+
+    // Add a function to jump to final stage
+    const completeAnimation = () => {
+      clearInterval(updateText);
+      text.textContent = stages[stages.length - 1];
+    };
+
+    // Store this function in the thinking element
+    thinking.completeAnimation = completeAnimation;
 
     const updateText = setInterval(() => {
       stage = (stage + 1) % (stages.length - 1);
@@ -147,7 +175,7 @@ async function handleSendMessage() {
 
   // Show appropriate thinking animation based on bias checker state
   const thinking = createThinkingAnimation(
-    biasCheckerEnabled ? "map" : "simple"
+    stateManager.getState("biasCheckerEnabled") ? "map" : "simple"
   );
   messageHandler.appendToChatBox(thinking);
 
@@ -178,7 +206,7 @@ async function handleAzureResponse(userMessage) {
       },
       body: JSON.stringify({
         input: userMessage,
-        biasCheckerEnabled: biasCheckerEnabled,
+        biasCheckerEnabled: stateManager.getState("biasCheckerEnabled"),
       }),
     });
 
@@ -192,6 +220,13 @@ async function handleAzureResponse(userMessage) {
     // Remove thinking animation and clear interval
     const thinking = document.querySelector(".thinking");
     if (thinking) {
+      // If response arrived before animation completed, show final stage first
+      if (thinking.completeAnimation) {
+        thinking.completeAnimation();
+        // Add a small delay so user can see the final stage
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
       if (thinking.dataset.intervalId) {
         clearInterval(Number(thinking.dataset.intervalId));
       }
