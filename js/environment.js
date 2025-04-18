@@ -8,7 +8,9 @@ export const environment = {
       ? "http://localhost:3000"
       : window.location.hostname === "debiasme.github.io"
       ? "https://debiasme-github-io.onrender.com"
-      : "https://debiasme-github-io.onrender.com",
+      : window.location.hostname === "cmlmanni.github.io"
+      ? "https://ayeeye.onrender.com" // Point to the appropriate backend
+      : "https://debiasme-github-io.onrender.com", // Default fallback
   // Add explicit headers to ensure Origin is sent
   headers: {
     "Content-Type": "application/json",

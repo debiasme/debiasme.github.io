@@ -24,7 +24,9 @@ const allowedOrigins = isDev
   : [
       "https://debiasme-github-io.onrender.com",
       "https://debiasme.github.io",
-      // undefined, // Add undefined as an allowed origin
+      "https://cmlmanni.github.io", // Add this line for the new domain
+      "https://ayeeye.onrender.com",
+      // undefined, // Allow undefined origin for API tools
     ];
 
 app.use((req, res, next) => {
