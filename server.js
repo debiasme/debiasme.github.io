@@ -24,8 +24,6 @@ const allowedOrigins = isDev
   : [
       "https://debiasme-github-io.onrender.com",
       "https://debiasme.github.io",
-      "https://cmlmanni.github.io/AyeEye",
-      "https://cmlmanni.github.io",
       // undefined, // Add undefined as an allowed origin
     ];
 
