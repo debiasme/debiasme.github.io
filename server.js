@@ -22,7 +22,7 @@ const isDev = process.env.NODE_ENV !== "production";
 const allowedOrigins = isDev
   ? true
   : [
-      "https://ayeeye.onrender.com",
+      "https://debiasme-github-io.onrender.com",
       "https://debiasme.github.io",
       "https://cmlmanni.github.io/AyeEye",
       "https://cmlmanni.github.io",
