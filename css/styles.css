@@ -43,13 +43,24 @@ body {
 /* Message Layout */
 .message-row {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 30px;
-  margin: 20px 0;
+  justify-content: space-between;
+  margin-bottom: 20px;
   width: 100%;
-  position: relative;
-  padding-right: 20px;
+}
+
+.message-left-column,
+.message-right-column {
+  max-width: 48%; /* Adjust as needed */
+}
+
+.message-right-column {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.message-left-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .message-content {
@@ -66,11 +77,15 @@ body {
 }
 
 /* Message Types */
+.user-message,
+.ai-message {
+  max-width: 100%; /* Instead of fixed width */
+}
+
 .user-message {
   text-align: right;
   align-self: flex-end;
   width: fit-content;
-  max-width: 70%;
   margin-left: auto;
 }
 
@@ -86,7 +101,6 @@ body {
   gap: 20px;
   position: relative;
   width: 100%;
-  max-width: 100%;
   flex-shrink: 0;
   align-self: flex-start;
 }
@@ -128,6 +142,8 @@ body {
   z-index: 50;
   pointer-events: auto !important;
   margin-left: 20px;
+  width: 100%;
+  margin-top: 10px;
 }
 
 .prompt-section {
@@ -1388,11 +1404,16 @@ body {
   }
 }
 
-.footer {
-  position: fixed;
+.header {
+  /* Update selector from .footer to .header */
   width: 100%;
   text-align: center;
   color: #e0e0e0;
+  background-color: rgba(31, 41, 55, 0.9);
+  padding: 8px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+  margin-bottom: 10px;
 }
 
 /* Add box styling for suggestion header and reflection section */

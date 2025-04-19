@@ -6,6 +6,11 @@ import { BiasChecker } from "./biasChecker.js";
  * Message handling utilities
  */
 class MessageHandler {
+  constructor() {
+    // Existing code...
+    this.biasMaps = []; // Array to track all created maps
+  }
+
   /**
    * Create a new message element
    * @param {string} className - CSS class for the message
@@ -20,9 +25,25 @@ class MessageHandler {
         contentLength: content.length,
         hasBiases: biases && biases.length > 0,
         numberOfBiases: biases?.length,
-        biasData: biases, // Add this for debugging
+        biasData: biases,
       });
 
+      // Create the message row with a 2-column layout
+      const row = document.createElement("div");
+      row.className = "message-row";
+
+      // Create left and right columns
+      const leftColumn = document.createElement("div");
+      leftColumn.className = "message-left-column";
+
+      const rightColumn = document.createElement("div");
+      rightColumn.className = "message-right-column";
+
+      // Add both columns to the row
+      row.appendChild(leftColumn);
+      row.appendChild(rightColumn);
+
+      // Create the actual message bubble
       const element = document.createElement("div");
       element.className = className;
 
@@ -30,6 +51,16 @@ class MessageHandler {
       messageContent.className = "message-content animate-fade-in";
       messageContent.innerHTML = this.sanitizeContent(content);
       element.appendChild(messageContent);
+
+      // Place the message in the appropriate column based on type
+      if (className === "user-message") {
+        rightColumn.appendChild(element);
+      } else {
+        leftColumn.appendChild(element);
+      }
+
+      // Store message type as a data attribute for later reference
+      row.dataset.messageType = className;
 
       if (biases && biases.length > 0) {
         console.log("Creating bias map with biases:", biases);
@@ -39,7 +70,8 @@ class MessageHandler {
           type: this.cleanBiasType(bias.type),
         }));
 
-        const biasMap = this.createBiasMap(cleanedBiases);
+        // Create the bias map - this will be positioned by createBiasMap
+        const biasMap = this.createBiasMap(cleanedBiases, row);
 
         // Connect the message content with the bias map
         biasMap.setMessageContent(messageContent);
@@ -93,13 +125,7 @@ class MessageHandler {
         });
       }
 
-      if (className === "ai-message" || className === "user-message") {
-        const row = document.createElement("div");
-        row.className = "message-row";
-        row.appendChild(element);
-        return row;
-      }
-      return element;
+      return row;
     } catch (error) {
       console.error("Error creating message element:", error);
       return null;
@@ -109,33 +135,44 @@ class MessageHandler {
   /**
    * Create and display the bias map
    * @param {Array} biases - Array of biases
+   * @param {HTMLElement} row - Message row element
    * @returns {BiasMap} Created bias map instance
    */
-  createBiasMap(biases) {
+  createBiasMap(biases, row) {
     console.log("Creating bias map with:", biases);
 
-    // Check if container exists
-    const mapContainer = document.querySelector(".bias-map-container");
-    if (!mapContainer) {
-      console.error("Bias map container is missing!");
-      // Create container if missing
-      const newContainer = document.createElement("div");
-      newContainer.className = "bias-map-container";
-      document.querySelector(".message-row").appendChild(newContainer);
+    // Create a new unique container for each map
+    const newContainer = document.createElement("div");
+    newContainer.className = "bias-map-container";
+    newContainer.id = `bias-map-${Date.now()}`; // Add unique ID using timestamp
+
+    // Append to the provided message row
+    if (row) {
+      row.appendChild(newContainer);
+    } else {
+      console.error("Message row is missing!");
+      document.querySelector(".message-container").appendChild(newContainer); // Fallback
     }
 
+    // Add title AFTER container is in the DOM
+    const mapTitle = document.createElement("div");
+    mapTitle.className = "bias-map-title";
+    mapTitle.textContent = `Bias Map - ${new Date().toLocaleTimeString()}`;
+    newContainer.prepend(mapTitle);
+
     // Check container dimensions
-    const container = document.querySelector(".bias-map-container");
     console.log(
       "Map container dimensions:",
-      container.clientWidth,
+      newContainer.clientWidth,
       "x",
-      container.clientHeight
+      newContainer.clientHeight
     );
 
-    // Create map instance
-    const biasMap = new BiasMap(container);
+    // Create map instance with the new container
+    const biasMap = new BiasMap(newContainer);
     biasMap.updateMap(biases);
+
+    this.biasMaps.push(biasMap);
 
     return biasMap;
   }
