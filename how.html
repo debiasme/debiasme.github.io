@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>How It Works - DeBiasMe</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body class="content-page">
+    <div id="page-container">
+      <div class="header">
+        <p>
+          This tool is powered by AI and is under development. AI may not always
+          get it right. Please use your best judgement.
+        </p>
+      </div>
+
+      <!-- Navigation Bar -->
+      <nav class="main-nav">
+        <div class="nav-container">
+          <div class="nav-logo">
+            <h1>DeBiasMe</h1>
+            <p class="nav-tagline">Detect and visualize bias in AI responses</p>
+          </div>
+          <div class="nav-links">
+            <a href="index.html" class="nav-link">Demo</a>
+            <a href="about.html" class="nav-link">About Us</a>
+            <a href="why.html" class="nav-link">Why DeBiasMe</a>
+            <a href="how.html" class="nav-link active">How It Works</a>
+            <a href="biases.html" class="nav-link">Types of Biases</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="page-content">
+        <h1>How DeBiasMe Works</h1>
+
+        <section class="content-section">
+          <h2>Our Approach</h2>
+          <p>
+            DeBiasMe employs a comprehensive approach to bias detection and
+            visualization, using AI to analyze text for potential biases while
+            providing interactive visualizations to help users understand and
+            address these biases.
+          </p>
+        </section>
+
+        <section class="content-section">
+          <h2>The Process</h2>
+
+          <div class="process-step">
+            <h3>1. Bias Detection</h3>
+            <p>
+              When you enter text, DeBiasMe uses Azure OpenAI to analyze it
+              against an extensive taxonomy of bias types. The system identifies
+              potentially biased phrases and categorizes them according to a
+              hierarchical classification system.
+            </p>
+          </div>
+
+          <div class="process-step">
+            <h3>2. Visualization</h3>
+            <p>
+              Detected biases are visualized using interactive D3.js
+              force-directed graphs that show relationships between different
+              types of biases found in the text. This hierarchical visualization
+              helps users understand the broader categories and specific
+              manifestations of bias.
+            </p>
+          </div>
+
+          <div class="process-step">
+            <h3>3. Highlighting &amp; Suggestions</h3>
+            <p>
+              Biased phrases are highlighted directly in the text, with tooltips
+              explaining the type of bias detected. Each highlighted section
+              includes suggestions for alternative, more neutral phrasing.
+            </p>
+          </div>
+
+          <div class="process-step">
+            <h3>4. Interactive Learning</h3>
+            <p>
+              Users can click on highlighted phrases or nodes in the
+              visualization to learn more about specific bias types. The system
+              provides educational content about why certain language patterns
+              may perpetuate bias.
+            </p>
+          </div>
+
+          <div class="process-step">
+            <h3>5. Refinement</h3>
+            <p>
+              Users can accept suggestions to automatically replace biased
+              phrases with more neutral alternatives, helping to develop more
+              inclusive communication habits over time.
+            </p>
+          </div>
+        </section>
+
+        <section class="content-section">
+          <h2>Technical Implementation</h2>
+          <p>DeBiasMe is built with modern web technologies:</p>
+          <ul class="feature-list">
+            <li>
+              Pure JavaScript with ES6 modules for a lightweight, efficient
+              experience
+            </li>
+            <li>D3.js for interactive data visualizations</li>
+            <li>Azure OpenAI API for sophisticated bias detection</li>
+            <li>Custom state management for a responsive user interface</li>
+            <li>Mobile-responsive design for accessibility across devices</li>
+          </ul>
+        </section>
+      </div>
+
+      <footer class="page-footer">
+        <p>&copy; 2025 DeBiasMe Project.</p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Types of Biases - DeBiasMe</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body class="content-page">
+    <div id="page-container">
+      <div class="header">
+        <p>
+          This tool is powered by AI and is under development. AI may not always
+          get it right. Please use your best judgement.
+        </p>
+      </div>
+
+      <!-- Navigation Bar -->
+      <nav class="main-nav">
+        <div class="nav-container">
+          <div class="nav-logo">
+            <h1>DeBiasMe</h1>
+            <p class="nav-tagline">Detect and visualize bias in AI responses</p>
+          </div>
+          <div class="nav-links">
+            <a href="index.html" class="nav-link">Demo</a>
+            <a href="about.html" class="nav-link">About Us</a>
+            <a href="why.html" class="nav-link">Why DeBiasMe</a>
+            <a href="how.html" class="nav-link">How It Works</a>
+            <a href="biases.html" class="nav-link active">Types of Biases</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="page-content">
+        <h1>Types of Biases</h1>
+
+        <section class="content-section introduction">
+          <p>
+            DeBiasMe analyzes text for a comprehensive range of bias types
+            organized into a hierarchical classification system. Understanding
+            these categories can help you identify and mitigate biases in your
+            own communication.
+          </p>
+        </section>
+
+        <!-- Human Bias Section -->
+        <section class="content-section bias-category">
+          <h2 class="bias-category-title">1. Human Bias</h2>
+          <p>
+            Human biases arise from our cognitive processes, social dynamics,
+            and individual experiences. These biases shape how we perceive and
+            interpret information.
+          </p>
+
+          <div class="bias-subcategory">
+            <h3>Individual Biases</h3>
+            <p>
+              Biases that operate at the personal level, influencing how we
+              process information and make judgments.
+            </p>
+            <ul class="bias-type-list">
+              <li>
+                <strong>Behavioral:</strong> Assumptions about how someone will
+                act based on stereotypes or limited observations
+              </li>
+              <li>
+                <strong>Interpretation:</strong> Skewing the meaning of
+                information based on preconceptions
+              </li>
+              <li>
+                <strong>Belief Persistence/Principle:</strong> Holding onto
+                established beliefs despite contradictory evidence
+              </li>
+              <li>
+                <strong>Selective Adherence:</strong> Inconsistently applying
+                principles to favor certain outcomes
+              </li>
+              <li>
+                <strong>Spotlight Effect:</strong> Overestimating how much
+                others notice our actions or appearance
+              </li>
+              <li>
+                <strong>Situation Framing:</strong> Presenting scenarios in ways
+                that emphasize certain aspects while downplaying others
+              </li>
+              <li>
+                <strong>Human Expertise:</strong> Over/undervaluing human
+                judgment based on status or credentials
+              </li>
+              <li>
+                <strong>Presentation:</strong> Judging information based on how
+                it's displayed rather than content
+              </li>
+              <li>
+                <strong>Ranking:</strong> Creating hierarchies even when
+                distinctions are minimal or arbitrary
+              </li>
+            </ul>
+          </div>
+
+          <div class="bias-subcategory">
+            <h3>Group Biases</h3>
+            <p>
+              Biases that emerge from group dynamics and collective
+              decision-making.
+            </p>
+            <ul class="bias-type-list">
+              <li>
+                <strong>Groupthink:</strong> When desire for harmony leads to
+                irrational decision-making
+              </li>
+              <li>
+                <strong>Bandwagon:</strong> Adopting beliefs because they're
+                popular
+              </li>
+              <li>
+                <strong>Deployment:</strong> Favoring familiar approaches
+                regardless of appropriateness
+              </li>
+              <li>
+                <strong>Sunk Cost Fallacy:</strong> Continuing endeavors due to
+                previous investment despite poor outcomes
+              </li>
+            </ul>
+          </div>
+
+          <div class="bias-subcategory">
+            <h3>Cognitive Biases</h3>
+            <p>
+              Systematic patterns of deviation from norm or rationality in
+              judgment.
+            </p>
+            <ul class="bias-type-list">
+              <li>
+                <strong>Confirmation:</strong> Seeking information that confirms
+                existing beliefs
+              </li>
+              <li>
+                <strong>Anchoring:</strong> Relying too heavily on the first
+                piece of information encountered
+              </li>
+              <li>
+                <strong>Availability Heuristic:</strong> Judging likelihood
+                based on how easily examples come to mind
+              </li>
+              <li>
+                <strong>Dunning-Kruger Effect:</strong> Overestimating abilities
+                when knowledge is limited
+              </li>
+              <li>
+                <strong>Implicit Bias:</strong> Unconscious attitudes affecting
+                understanding and decisions
+              </li>
+              <li>
+                <strong>Automation Complacency:</strong> Over-relying on
+                automated systems
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Statistical/Computational Bias Section -->
+        <section class="content-section bias-category">
+          <h2 class="bias-category-title">2. Statistical/Computational Bias</h2>
+          <p>
+            These biases emerge from how we collect, process, and interpret
+            data, affecting the validity and reliability of our analyses.
+          </p>
+
+          <div class="bias-subcategory">
+            <h3>Selection and Sampling</h3>
+            <p>
+              Biases that arise from how data is collected and samples are
+              chosen.
+            </p>
+            <ul class="bias-type-list">
+              <li>
+                <strong>Data Generation:</strong> When collection processes
+                systematically favor certain outcomes
+              </li>
+              <li>
+                <strong>Detection:</strong> When methodology is more likely to
+                find certain types of results
+              </li>
+              <li>
+                <strong>Collective Fallacy:</strong> Drawing conclusions about
+                individuals based on group data or vice versa
+              </li>
+              <li>
+                <strong>Evaluation:</strong> When assessment methods advantage
+                certain groups
+              </li>
+              <li>
+                <strong>Selection:</strong> When sample data isn't
+                representative of the target population
+              </li>
+              <li>
+                <strong>Treatment:</strong> Systematic differences in how cases
+                are handled
+              </li>
+              <li>
+                <strong>Assignment:</strong> Non-random allocation of subjects
+                affecting outcomes
+              </li>
+              <li>
+                <strong>Popularity:</strong> When frequently occurring items
+                receive disproportionate weight
+              </li>
+              <li>
+                <strong>Population:</strong> When study groups don't reflect
+                target populations
+              </li>
+              <li>
+                <strong>Simpson's Paradox:</strong> When trends appear in groups
+                but disappear when combined
+              </li>
+              <li>
+                <strong>Temporal:</strong> When timing-related factors
+                systematically influence data
+              </li>
+              <li>
+                <strong>Uncertainty:</strong> Systematic errors in representing
+                probabilities
+              </li>
+            </ul>
+          </div>
+
+          <div class="bias-subcategory">
+            <h3>Processing/Validation</h3>
+            <p>Biases that occur during data analysis and interpretation.</p>
+            <ul class="bias-type-list">
+              <li>
+                <strong>Amplification:</strong> When processes magnify small
+                differences in data
+              </li>
+              <li>
+                <strong>Inherited:</strong> When new systems adopt biases from
+                predecessors
+              </li>
+              <li>
+                <strong>Error Propagation:</strong> When initial mistakes
+                compound through analysis steps
+              </li>
+              <li>
+                <strong>Model Selection:</strong> Choosing frameworks that favor
+                certain patterns
+              </li>
+              <li>
+                <strong>Regression:</strong> Systematic errors in statistical
+                models for different groups
+              </li>
+            </ul>
+          </div>
+
+          <div class="bias-subcategory">
+            <h3>Use and Interpretation</h3>
+            <p>Biases in how we apply and interpret analytical results.</p>
+            <ul class="bias-type-list">
+              <li>
+                <strong>Activity:</strong> Disproportionately representing users
+                with higher engagement
+              </li>
+              <li>
+                <strong>Concept Drift:</strong> When meaning of data changes but
+                models remain fixed
+              </li>
+              <li>
+                <strong>Energy:</strong> Favoring options with lower
+                computational/cognitive costs
+              </li>
+              <li>
+                <strong>Feedback Loop:</strong> When outputs influence future
+                inputs, creating self-reinforcing patterns
+              </li>
+              <li>
+                <strong>Data Bridging:</strong> Inappropriately transferring
+                conclusions between different contexts
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Systemic Bias Section -->
+        <section class="content-section bias-category">
+          <h2 class="bias-category-title">3. Systemic Bias</h2>
+          <p>
+            These biases are embedded within social, political, and
+            institutional structures, shaping outcomes at a systemic level.
+          </p>
+
+          <div class="bias-subcategory">
+            <h3>Historical</h3>
+            <p>
+              Inequities embedded in data and systems due to historical
+              practices and policies.
+            </p>
+            <p>
+              Historical biases perpetuate past injustices in current systems,
+              creating persistent advantages for historically privileged groups
+              and barriers to equity despite current intentions.
+            </p>
+          </div>
+
+          <div class="bias-subcategory">
+            <h3>Societal</h3>
+            <p>
+              Biases that reflect and reinforce existing social prejudices,
+              stereotypes, or inequalities prevalent in broader culture.
+            </p>
+            <p>
+              Societal biases normalize harmful cultural stereotypes, create
+              systems that mirror rather than correct social inequities, and
+              establish barriers to equal participation for marginalized groups.
+            </p>
+          </div>
+
+          <div class="bias-subcategory">
+            <h3>Institutional</h3>
+            <p>
+              Policies, practices, and procedures within organizations that
+              systematically advantage certain groups while disadvantaging
+              others.
+            </p>
+            <p>
+              Institutional biases create structural barriers to equity, lead to
+              persistent disparities despite individual good intentions, and
+              establish self-perpetuating systems of advantage and disadvantage.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <footer class="page-footer">
+        <p>&copy; 2025 DeBiasMe Project.</p>
+      </footer>
+    </div>
+  </body>
+</html>
