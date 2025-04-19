@@ -1,7 +1,7 @@
 export function cleanBiasType(biasType) {
   // Check if biasType is defined before using string methods
-  if (!biasType) {
-    return ""; // Return empty string or some default value
+  if (!biasType || biasType.toLowerCase() === "not applicable") {
+    return "General Bias"; // Return a more meaningful default
   }
 
   // Continue with the existing string operations

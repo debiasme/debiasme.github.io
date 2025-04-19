@@ -1,3 +1,5 @@
+import biasExplanations from "./biasExplanations.js";
+
 export class BiasMap {
   constructor(container) {
     if (!container) {
@@ -834,6 +836,33 @@ export class BiasMap {
     if (!node.phrases || node.phrases.length === 0) return;
 
     let content = `<h3>${node.label}</h3>`;
+
+    // Get explanation for this bias type, or use a generic one if not found
+    const explanation = biasExplanations[node.label] || {
+      what: "This type of bias involves making assumptions that may not be supported by evidence.",
+      why: [
+        "Lead to unfair treatment",
+        "Result in suboptimal decisions",
+        "Reinforce existing inequalities",
+      ],
+    };
+
+    // Add "What is this bias?" section
+    content += `<h4>What is this bias?</h4>`;
+    content += `<p>${explanation.what}</p>`;
+
+    // Add "Why is it problematic?" section
+    content += `<h4>Why is it problematic?</h4>`;
+    content += `<p>This type of bias can:</p>
+    <ul>`;
+
+    explanation.why.forEach((reason) => {
+      content += `<li>${reason}</li>`;
+    });
+
+    content += `</ul>`;
+
+    // Original content continues...
     content += `<p>This bias appears in the following phrases:</p>`;
 
     node.phrases.forEach((phrase, i) => {
@@ -934,6 +963,21 @@ export class BiasMap {
     const legend = document.createElement("div");
     legend.className = "bias-map-legend";
 
+    // Add toggle button
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "legend-toggle";
+    toggleBtn.innerHTML = "Legend ▼";
+    toggleBtn.addEventListener("click", () => {
+      const content = legend.querySelector(".legend-content");
+      const isVisible = content.style.display !== "none";
+      content.style.display = isVisible ? "none" : "block";
+      toggleBtn.innerHTML = isVisible ? "Legend ▶" : "Legend ▼";
+    });
+
+    const content = document.createElement("div");
+    content.className = "legend-content";
+
+    // Add the existing legend items to the content div
     const legendItems = [
       { label: "Main Category", color: "#4477AA", level: 0 } /* Tol blue */,
       { label: "Category", color: "#66CCEE", level: 1 } /* Tol cyan */,
@@ -954,9 +998,11 @@ export class BiasMap {
 
       itemDiv.appendChild(colorBox);
       itemDiv.appendChild(label);
-      legend.appendChild(itemDiv);
+      content.appendChild(itemDiv);
     });
 
+    legend.appendChild(toggleBtn);
+    legend.appendChild(content);
     this.container.appendChild(legend);
   }
 }
