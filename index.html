@@ -20,10 +20,18 @@
           This tool is powered by AI and is under development. AI may not always
           get it right. Please use your best judgement.
         </p>
+        <!-- Add the nav toggle button -->
+        <button
+          id="nav-toggle"
+          class="nav-toggle-button"
+          title="Toggle Navigation Bar"
+        >
+          <span class="toggle-icon">▲</span>
+        </button>
       </div>
 
-      <!-- Navigation Bar -->
-      <nav class="main-nav">
+      <!-- Navigation Bar with collapsible class -->
+      <nav class="main-nav" id="main-nav">
         <div class="nav-container">
           <div class="nav-logo">
             <h1>DeBiasMe</h1>
@@ -68,5 +76,7 @@
     <script src="js/environment.js" type="module"></script>
     <script src="js/sketch.js" type="module"></script>
     <script src="js/script.js" type="module"></script>
+    <!-- Add this new script for nav toggle functionality -->
+    <script src="js/navToggle.js" type="module"></script>
   </body>
 </html>
