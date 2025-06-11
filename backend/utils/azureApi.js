@@ -1,7 +1,7 @@
 import axios from "axios";
 import { AZURE_API_KEY, AZURE_ENDPOINT, AZURE_DEPLOYMENT } from "../config.js";
 
-const API_VERSION = "2024-12-01-preview";
+const API_VERSION = "2025-01-01-preview";
 
 export async function callAzureOpenAI(messages, options = {}) {
   const url = `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT}/chat/completions`;
