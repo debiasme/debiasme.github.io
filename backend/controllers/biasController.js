@@ -23,15 +23,16 @@ export async function analyzeBias(req, res) {
 
     let analysis;
     try {
-      let content = response.data.choices[0].message.content;
+      // Use the actual content returned by callAzureOpenAI
+      let parsedContent = content;
 
       // Extract JSON if wrapped in code block
-      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      const jsonMatch = parsedContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
       if (jsonMatch) {
-        content = jsonMatch[1].trim();
+        parsedContent = jsonMatch[1].trim();
       }
 
-      analysis = JSON.parse(content);
+      analysis = JSON.parse(parsedContent);
       if (analysis.biases) {
         analysis.biases = analysis.biases.map((bias) => ({
           ...bias,
