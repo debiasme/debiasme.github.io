@@ -64,7 +64,8 @@ export const prompts = {
     3. A clear, actionable suggestion for alternative phrasing that is bias free
     4. A brief explanation of why this phrase demonstrates this specific type of bias
     
-    Respond with valid JSON in this format only:
+    Respond with valid JSON ONLY. Do NOT include any explanations, markdown, or text outside the JSON object. Do NOT use markdown formatting or code blocks. Your entire response MUST be a single JSON object matching this format:
+
     {
       "biases": [
         {

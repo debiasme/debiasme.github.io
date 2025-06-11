@@ -23,6 +23,14 @@ export async function analyzeBias(req, res) {
 
     let analysis;
     try {
+      let content = response.data.choices[0].message.content;
+
+      // Extract JSON if wrapped in code block
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      if (jsonMatch) {
+        content = jsonMatch[1].trim();
+      }
+
       analysis = JSON.parse(content);
       if (analysis.biases) {
         analysis.biases = analysis.biases.map((bias) => ({
