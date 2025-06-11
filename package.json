@@ -19,6 +19,7 @@
     "dotenv": "^16.5.0",
     "dotnet": "^1.1.4",
     "express": "^4.21.2",
+    "marked": "^15.0.12",
     "openai": "^4.78.1"
   },
   "type": "module",

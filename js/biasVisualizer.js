@@ -1,3 +1,5 @@
+import { marked } from "marked";
+
 export class BiasVisualizer {
   constructor() {
     this.tooltipTimeout = null;
@@ -211,6 +213,12 @@ export class BiasVisualizer {
           [{ text: "Got it", type: "primary" }]
         );
       });
+
+      // When setting explanation content:
+      const explanation = highlight.dataset.explanation;
+      if (explanation) {
+        tooltip.innerHTML = marked.parse(explanation);
+      }
     });
   }
 
