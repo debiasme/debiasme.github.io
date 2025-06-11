@@ -23,10 +23,9 @@ export async function analyzeBias(req, res) {
 
     let analysis;
     try {
-      // Use the actual content returned by callAzureOpenAI
       let parsedContent = content;
 
-      // Try to extract JSON from code block if present
+      // Always extract the first {...} block, even if not in code block
       const codeBlockMatch = parsedContent.match(
         /```(?:json)?\s*([\s\S]*?)\s*```/i
       );
@@ -41,6 +40,9 @@ export async function analyzeBias(req, res) {
           parsedContent = curlyMatch[0];
         }
       }
+
+      // Final fallback: remove any leading/trailing backticks or whitespace
+      parsedContent = parsedContent.replace(/^`+|`+$/g, "").trim();
 
       analysis = JSON.parse(parsedContent);
       if (analysis.biases) {
